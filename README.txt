@@ -1,3 +1,3 @@
 MARU_CAP
 --branchlist--
-dev : 개발
+dev : 개발 <<
