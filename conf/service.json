@@ -3,9 +3,9 @@
     "dbType": "MYSQL",
     "poolName": "MARU_CAP",
     "driver": "org.mariadb.jdbc.Driver",
-    "jdbcUrl": "jdbc:mariadb://203.245.13.52:5021/CP_MARU",
-    "userName": "MARU",
-    "passWord": "rhkddnjs0801!#",
+    "jdbcUrl": "jdbc:mariadb://127.0.0.1:3306/CP_MARU",
+    "userName": "bkwinners",
+    "passWord": "2021bk07&*(db2",
     "maxConnection": 10,
     "minConnection": 5,
     "partitionCount": 1
