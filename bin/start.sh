@@ -1,5 +1,5 @@
 #!/bin/sh
-cd /home/MARU/MARU_CAP/bin
+cd /home/bkwinners/MARU/MARU_CAP/bin
 
 ./stop.sh
 echo "starting ...."
