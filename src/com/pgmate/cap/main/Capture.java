@@ -593,7 +593,7 @@ public class Capture {
 		trxCapMap.put("rootTrxDay"	, rootCapMap.getString("trxDay"));
 		trxCapMap.put("amount"		, trxRfdMap.getLong("rfdAmount"));
 		trxCapMap.put("installment"	, rootCapMap.getString("installment"));
-		if(rootCapMap.isEquals("vanId", "2006500010") || rootCapMap.isEquals("vanId", "mtouch9")) {	// 면세용 아이디 
+		if(rootCapMap.isEquals("vanId", "M2247413") || rootCapMap.isEquals("vanId", "mtouch9")) {	// 면세용 아이디 
 			trxCapMap.put("vat"			, 0);
 		}else{
 			trxCapMap.put("vat"			, trxRfdMap.getLong("rfdVat"));
