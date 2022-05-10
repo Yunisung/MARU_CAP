@@ -144,7 +144,8 @@ public class Capture {
 		trxCapMap.put("amount"		, trxPayMap.getLong("amount"));
 		trxCapMap.put("installment"	, trxPayMap.getString("installment"));
 		
-		if(trxPayMap.isEquals("vanId", "2006500010") || trxPayMap.isEquals("vanId", "mtouch9")) {	// 면세용 아이디 
+		//PYS : 갤럭시아 면세용 단말기 M2247413
+		if(trxPayMap.isEquals("vanId", "M2247413") || trxPayMap.isEquals("vanId", "mtouch9")) {
 			trxCapMap.put("vat"			, 0);
 		}else{
 			trxCapMap.put("vat"			, calcRootVat(trxPayMap.getLong("amount")));
