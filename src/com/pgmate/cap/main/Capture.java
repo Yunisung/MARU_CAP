@@ -198,13 +198,13 @@ public class Capture {
 		}
 		
 		//야간 건 한도
-		if(trxCapMap.getLong("regTime") < 60000 && trxCapMap.getLong("amount") > 300000){
+		if(trxCapMap.getLong("regTime") < 60000 && trxCapMap.getLong("amount") > mchtMngMap.getLong("limitOnce") && mchtMngMap.getLong("limitOnce") != 0){
 			capDtlMap.put("risk","야간건한도");
 		}
 		
 		//주간 건 한도 
-		if(trxCapMap.getLong("regTime") >= 60000 && trxCapMap.getLong("amount") > mchtMngMap.getLong("limitOnce")){
-			capDtlMap.put("risk","건한도");
+		if(trxCapMap.getLong("regTime") >= 60000 && trxCapMap.getLong("amount") > mchtMngMap.getLong("limitOnce") && mchtMngMap.getLong("limitOnce") != 0){
+			capDtlMap.put("risk","건한도");		
 		}
 		
 		//위험,중복
