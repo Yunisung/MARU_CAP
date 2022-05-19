@@ -145,7 +145,8 @@ public class Capture {
 		trxCapMap.put("installment"	, trxPayMap.getString("installment"));
 		
 		//PYS : 갤럭시아 면세용 단말기 M2247413
-		if(trxPayMap.isEquals("vanId", "M2247413") || trxPayMap.isEquals("vanId", "mtouch9")) {
+		//PYS : KSNET 면세용 단말기 2010000009
+		if(trxPayMap.isEquals("vanId", "M2247413") || trxPayMap.isEquals("vanId", "2010000009") || trxPayMap.isEquals("vanId", "mtouch9")) {
 			trxCapMap.put("vat"			, 0);
 		}else{
 			trxCapMap.put("vat"			, calcRootVat(trxPayMap.getLong("amount")));
@@ -593,7 +594,7 @@ public class Capture {
 		trxCapMap.put("rootTrxDay"	, rootCapMap.getString("trxDay"));
 		trxCapMap.put("amount"		, trxRfdMap.getLong("rfdAmount"));
 		trxCapMap.put("installment"	, rootCapMap.getString("installment"));
-		if(rootCapMap.isEquals("vanId", "M2247413") || rootCapMap.isEquals("vanId", "mtouch9")) {	// 면세용 아이디 
+		if(rootCapMap.isEquals("vanId", "M2247413") || rootCapMap.isEquals("vanId", "2010000009") || rootCapMap.isEquals("vanId", "mtouch9")) {	// 면세용 아이디 
 			trxCapMap.put("vat"			, 0);
 		}else{
 			trxCapMap.put("vat"			, trxRfdMap.getLong("rfdVat"));
