@@ -377,7 +377,8 @@ public class Capture {
 			}
 			
 			// 영중소 가맹점 수수료 추가 
-			if(!mchtMngMap.getString("diffType").equals("일반") && capDtlMap.getString("van").startsWith("KSPAY") && (trxPayMap.isEquals("vanId", "2006500004") || trxPayMap.isEquals("vanId", "2006500007") || trxPayMap.isEquals("vanId", "2006500009"))) {
+			//PYS : 부국위너스 영중소 VANID로 변경 2010000007, 2010000008
+			if(!mchtMngMap.getString("diffType").equals("일반") && capDtlMap.getString("van").startsWith("KSPAY") && (trxPayMap.isEquals("vanId", "2010000007") || trxPayMap.isEquals("vanId", "2010000008"))) {
 				double diffRate = 0;
 				double stlDiffAgencyRate = 0;
 				double stlDiffDistRate = 0;
@@ -699,8 +700,9 @@ public class Capture {
 					capDtlMap.put("stlVanFee"	, calcDefaultFeeVat(trxCapMap.getLong("amount"),capDtlMap.getDouble("stlVanRate")));
 				}
 			}
-			// 영중소 가맹점 수수료 추가 
-			if(!rootCapMap.getString("stlDiffType").equals("일반") && capDtlMap.getString("van").startsWith("KSPAY") && (trxRfdMap.isEquals("vanId", "2006500004") || trxRfdMap.isEquals("vanId", "2006500007") || trxRfdMap.isEquals("vanId", "2006500009"))) {
+			// 영중소 가맹점 수수료 추가
+			//PYS : 부국위너스 영중소 VANID로 변경 2010000007, 2010000008
+			if(!rootCapMap.getString("stlDiffType").equals("일반") && capDtlMap.getString("van").startsWith("KSPAY") && (trxRfdMap.isEquals("vanId", "2010000007") || trxRfdMap.isEquals("vanId", "2010000008"))) {
 
 				long stlDiffAgencyFee = calcFeeVat(trxCapMap.getLong("amount"), rootCapMap.getDouble("stlDiffAgencyRate"));
 				long stlDiffDistFee = calcFeeVat(trxCapMap.getLong("amount"), rootCapMap.getDouble("stlDiffDistRate"));
