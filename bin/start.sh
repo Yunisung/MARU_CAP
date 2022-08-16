@@ -1,6 +1,4 @@
 #!/bin/sh
-cd /home/bkwinners/MARU/MARU_CAP/bin
-
 ./stop.sh
 echo "starting ...."
 
