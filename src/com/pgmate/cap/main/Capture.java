@@ -1184,11 +1184,17 @@ public class Capture {
 	}
 	
 	public long calcVat(long amount){
-		if(amount < 0){
-			return -new Double(-amount *10 /100).longValue();
-		}else{
-			return new Double(amount *10 /100).longValue();
-		}
+		//220905_PYS : 수수료 반올림 적용
+		double vat = amount * 0.1f;
+		vat = Math.round(vat);
+		return new Double(vat).longValue();
+
+//		if(amount < 0){
+//			return -new Double(-amount *10 /100).longValue();
+//
+//		}else{
+//			return new Double(amount *10 /100).longValue();
+//		}
 	}
 	
 	public long calcFeeVat(long amount,double rate){
