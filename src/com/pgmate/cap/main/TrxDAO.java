@@ -460,10 +460,10 @@ public class TrxDAO extends DAO {
 		return rset.getRow(0);
 	}
 	
-	public SharedMap<String,Object> getTrxCapId(String trxId){
+	public SharedMap<String,Object> getTrxCapId(String capId){
 		super.setTable("VW_TRX_CAP");
 		super.setColumns("*");
-		super.addWhere("trxId"	,trxId,eq);
+		super.addWhere("capId"	,capId,eq);
 		
 		RecordSet rset = super.search();
 		super.initRecord();

@@ -65,9 +65,9 @@ public class CaptureFactoring {
 		}
 		
 		if(warningList.size() > 0){
-			for(String capId : warningList ){
-				logger.info("warning  : {}/{},{}",i++,size,capId);
-				warning(capId);
+			for(String trxId : warningList ){
+				logger.info("warning  : {}/{},{}",i++,size,trxId);
+				warning(trxId);
 			}
 		}
 		
@@ -382,8 +382,8 @@ public class CaptureFactoring {
 	 * 위험거래로 변경한다.
 	 * @param capId
 	 */
-	public void warning(String capId){
-		SharedMap<String,Object> rootCapMap	 	= trxDAO.getTrxCapId(capId);
+	public void warning(String trxId){
+		SharedMap<String,Object> rootCapMap	 	= trxDAO.getTrxCap(trxId);
 		if(rootCapMap == null){
 			//검색된 매입내역이 없으면 리턴한다.
 			return;

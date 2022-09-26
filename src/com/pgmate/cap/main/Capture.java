@@ -817,10 +817,10 @@ public class Capture {
 	
 	/**
 	 * 위험거래로 변경한다.
-	 * @param capId
+	 * @param trxId
 	 */
 	public void warning(String trxId){
-		SharedMap<String,Object> rootCapMap	 	= trxDAO.getTrxCapId(trxId);
+		SharedMap<String,Object> rootCapMap	 	= trxDAO.getTrxCap(trxId);
 		if(rootCapMap == null){
 			//검색된 매입내역이 없으면 리턴한다.
 			return;
