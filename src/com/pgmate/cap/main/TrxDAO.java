@@ -437,8 +437,8 @@ public class TrxDAO extends DAO {
 			SharedMap<String,Object> data = rset.getRow(0);
 			long rootAmount = data.getLong("amount");
 			if(rootAmount + trxPayMap.getLong("amount") >= 1000000){
-				logger.info("위험거래 WARNING : {}, old :{},new : {}",data.getString("capId"),rootAmount,trxPayMap.getLong("amount"));
-				return data.getString("capId");
+				logger.info("위험거래 WARNING : {}, old :{},new : {}",data.getString("trxId"),rootAmount,trxPayMap.getLong("amount"));
+				return data.getString("trxId");
 			}
 			
 			return "";
@@ -460,10 +460,10 @@ public class TrxDAO extends DAO {
 		return rset.getRow(0);
 	}
 	
-	public SharedMap<String,Object> getTrxCapId(String capId){
+	public SharedMap<String,Object> getTrxCapId(String trxId){
 		super.setTable("VW_TRX_CAP");
 		super.setColumns("*");
-		super.addWhere("capId"	,capId,eq);
+		super.addWhere("trxId"	,trxId,eq);
 		
 		RecordSet rset = super.search();
 		super.initRecord();

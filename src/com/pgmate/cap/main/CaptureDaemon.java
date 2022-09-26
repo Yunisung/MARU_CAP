@@ -24,8 +24,11 @@ public class CaptureDaemon extends Thread{
 				try {
 					Capture capture = new Capture();
 					capture.start();
-					CaptureFactoring captureFactoring = new CaptureFactoring();
-					captureFactoring.start();
+					//22.03.16 captureFactoring 미사용으로 주석처리
+					/*
+					 * CaptureFactoring captureFactoring = new CaptureFactoring();
+					 * captureFactoring.start();
+					 */
 					CapturePhone capturePhone = new CapturePhone();
 					capturePhone.start();
 					Thread.sleep(INTERVAL);

@@ -84,9 +84,9 @@ public class Capture {
 		}
 		
 		if(warningList.size() > 0){
-			for(String capId : warningList ){
-				logger.info("warning  : {}/{},{}",i++,size,capId);
-				warning(capId);
+			for(String trxId : warningList ){
+				logger.info("warning  : {}/{},{}",i++,size,trxId);
+				warning(trxId);
 			}
 		}
 		
@@ -211,9 +211,9 @@ public class Capture {
 		//위험,중복
 		if(!trxCapMap.isNullOrSpace("bin") && !trxCapMap.isNullOrSpace("last4")){
 			//위험 100 만원 이상 거래
-			String capId = trxDAO.getWarningFact(trxPayMap);
-			if(!capId.equals("")){
-				warningList.add(capId);
+			String trxId = trxDAO.getWarningFact(trxPayMap);
+			if(!trxId.equals("")){
+				warningList.add(trxId);
 				capDtlMap.put("risk"	,"위험");
 			}
 		}
