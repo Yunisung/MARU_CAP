@@ -40,7 +40,7 @@ public class CaptureTest {
                 String risk = map.getString("risk");
 
                 logger.debug("리스크 capId {}", capId);
-                assertEquals(risk, "위험");
+                assertEquals("위험", risk);
             }
         }
     }
