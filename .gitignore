@@ -1,2 +1,9 @@
 classes/
 logs/root.txt
+lib/MARU_*.jar
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
