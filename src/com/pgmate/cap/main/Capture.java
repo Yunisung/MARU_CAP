@@ -198,6 +198,7 @@ public class Capture {
 			capDtlMap.put("risk","주간할부");
 		}
 		
+		/* 22.10.05 건한도 설정 주석 처리 (calcRiskStatus에서 설정 됨)
 		//야간 건 한도
 		if(trxCapMap.getLong("regTime") < 60000 && trxCapMap.getLong("amount") > mchtMngMap.getLong("limitOnce") && mchtMngMap.getLong("limitOnce") != 0){
 			capDtlMap.put("risk","야간건한도");
@@ -207,6 +208,7 @@ public class Capture {
 		if(trxCapMap.getLong("regTime") >= 60000 && trxCapMap.getLong("amount") > mchtMngMap.getLong("limitOnce") && mchtMngMap.getLong("limitOnce") != 0){
 			capDtlMap.put("risk","건한도");		
 		}
+		*/
 		
 		//위험,중복
 		if(!trxCapMap.isNullOrSpace("bin") && !trxCapMap.isNullOrSpace("last4")){
