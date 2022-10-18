@@ -421,13 +421,13 @@ public class TrxDAO extends DAO {
 	}
 	
 	public String getWarningFact(SharedMap<String,Object> trxPayMap){
-		super.setTable("PG_TRX_PAY");
+		super.setTable("PG_TRX_CAP");
 		super.setColumns("trxId,amount");
 		super.addWhere("regDay"	,trxPayMap.getString("regDay"),eq);
 		super.addWhere("mchtId"	,trxPayMap.getString("mchtId"),eq);
 		super.addWhere("bin"	 	,trxPayMap.getString("bin"),eq);
 		super.addWhere("last4"	,trxPayMap.getString("last4"),eq);
-		super.addWhere("status"	,"승인",eq);
+		super.addWhere("capType"	,"매입",eq);
 		super.setOrderBy("trxId desc");
 		
 		RecordSet rset = super.search();
