@@ -25,11 +25,11 @@ public class TrxDAOTest {
     @Test
     public void 위험리스크_조회() {
         SharedMap<String, Object> trxPayMap = new SharedMap<>();
-        trxPayMap.put("regDay", "20220801");
-        trxPayMap.put("mchtId", "tep000");
-        trxPayMap.put("bin", "473867");
-        trxPayMap.put("last4", "906*");
-        trxPayMap.put("amount", "100000");
+        trxPayMap.put("regDay", "20221018");
+        trxPayMap.put("mchtId", "bktest001");
+        trxPayMap.put("bin", "422155");
+        trxPayMap.put("last4", "042*");
+        trxPayMap.put("amount", "1000000");
         //위험 100 만원 이상 거래
         String trxId = trxDAO.getWarningFact(trxPayMap);
         logger.debug("리스크 trxId {}", trxId);
