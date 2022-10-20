@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 
 public class CaptureTest {
 
-    private static Logger logger = LoggerFactory.getLogger(com.pgmate.cap.main.CaptureTest.class);
+    private static Logger logger = LoggerFactory.getLogger(CaptureTest.class);
 
     Capture capture;
     TrxDAO trxDAO;
