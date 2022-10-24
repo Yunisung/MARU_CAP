@@ -65,9 +65,9 @@ public class CaptureFactoring {
 		}
 		
 		if(warningList.size() > 0){
-			for(String capId : warningList ){
-				logger.info("warning  : {}/{},{}",i++,size,capId);
-				warning(capId);
+			for(String trxId : warningList ){
+				logger.info("warning  : {}/{},{}",i++,size,trxId);
+				warning(trxId);
 			}
 		}
 		
@@ -154,15 +154,17 @@ public class CaptureFactoring {
 			capDtlMap.put("risk","주간할부");
 		}
 		
+		/* 22.10.05 야간, 주간 건 한도 분리 주석 처리
 		//야간 건 한도
 		if(trxCapMap.getLong("regTime") < 60000 && trxCapMap.getLong("amount") > 300000){
 			capDtlMap.put("risk","야간건한도");
 		}
 		
 		//주간 건 한도 
-		if(trxCapMap.getLong("regTime") >= 60000 && trxCapMap.getLong("amount") > mchtMngMap.getLong("limitOnce")){
+		if(trxCapMap.getLong("regTime") >= 60000 && trxCapMap.getLong("amount") >= mchtMngMap.getLong("limitOnce")){
 			capDtlMap.put("risk","건한도");
 		}
+		*/
 		
 		//위험,중복
 		if(!trxCapMap.isNullOrSpace("bin") && !trxCapMap.isNullOrSpace("last4")){
@@ -179,8 +181,6 @@ public class CaptureFactoring {
 		if(!riskStatus.equals("")){
 			capDtlMap.put("risk", riskStatus);
 		}
-		
-		
 		
 		
 		if(!capDtlMap.isNullOrSpace("risk")){
@@ -382,8 +382,8 @@ public class CaptureFactoring {
 	 * 위험거래로 변경한다.
 	 * @param capId
 	 */
-	public void warning(String capId){
-		SharedMap<String,Object> rootCapMap	 	= trxDAO.getTrxCapId(capId);
+	public void warning(String trxId){
+		SharedMap<String,Object> rootCapMap	 	= trxDAO.getTrxCap(trxId);
 		if(rootCapMap == null){
 			//검색된 매입내역이 없으면 리턴한다.
 			return;

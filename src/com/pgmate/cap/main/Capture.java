@@ -84,9 +84,9 @@ public class Capture {
 		}
 		
 		if(warningList.size() > 0){
-			for(String capId : warningList ){
-				logger.info("warning  : {}/{},{}",i++,size,capId);
-				warning(capId);
+			for(String trxId : warningList ){
+				logger.info("warning  : {}/{},{}",i++,size,trxId);
+				warning(trxId);
 			}
 		}
 		
@@ -198,6 +198,7 @@ public class Capture {
 			capDtlMap.put("risk","주간할부");
 		}
 		
+		/* 22.10.05 건한도 설정 주석 처리 (calcRiskStatus에서 설정 됨)
 		//야간 건 한도
 		if(trxCapMap.getLong("regTime") < 60000 && trxCapMap.getLong("amount") > mchtMngMap.getLong("limitOnce") && mchtMngMap.getLong("limitOnce") != 0){
 			capDtlMap.put("risk","야간건한도");
@@ -207,13 +208,14 @@ public class Capture {
 		if(trxCapMap.getLong("regTime") >= 60000 && trxCapMap.getLong("amount") > mchtMngMap.getLong("limitOnce") && mchtMngMap.getLong("limitOnce") != 0){
 			capDtlMap.put("risk","건한도");		
 		}
+		*/
 		
 		//위험,중복
 		if(!trxCapMap.isNullOrSpace("bin") && !trxCapMap.isNullOrSpace("last4")){
 			//위험 100 만원 이상 거래
-			String capId = trxDAO.getWarningFact(trxPayMap);
-			if(!capId.equals("")){
-				warningList.add(capId);
+			String trxId = trxDAO.getWarningFact(trxPayMap);
+			if(!trxId.equals("")){
+				warningList.add(trxId);
 				capDtlMap.put("risk"	,"위험");
 			}
 		}
@@ -817,10 +819,10 @@ public class Capture {
 	
 	/**
 	 * 위험거래로 변경한다.
-	 * @param capId
+	 * @param trxId
 	 */
-	public void warning(String capId){
-		SharedMap<String,Object> rootCapMap	 	= trxDAO.getTrxCapId(capId);
+	public void warning(String trxId){
+		SharedMap<String,Object> rootCapMap	 	= trxDAO.getTrxCap(trxId);
 		if(rootCapMap == null){
 			//검색된 매입내역이 없으면 리턴한다.
 			return;
