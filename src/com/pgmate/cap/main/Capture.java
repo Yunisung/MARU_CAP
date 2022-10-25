@@ -215,7 +215,8 @@ public class Capture {
 			//위험 100 만원 이상 거래
 			String trxId = trxDAO.getWarningFact(trxPayMap);
 			if(!trxId.equals("")){
-				warningList.add(trxId);
+				//22.10.25 warningList에 직전거래가 add되면 위험 리스크 설정이 되어 주석처리
+//				warningList.add(trxId);
 				capDtlMap.put("risk"	,"위험");
 			}
 		}
