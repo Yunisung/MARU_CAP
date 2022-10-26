@@ -429,7 +429,7 @@ public class TrxDAO extends DAO {
 		super.addWhere("last4"	,trxPayMap.getString("last4"),eq);
 		super.addWhere("status"	,"승인",eq);
 		//22.10.25 pay에서 현재 거래건을 가져오지 않게하기 위해 조건문 추가
-		super.addWhere("trxId", trxPayMap.getString("trxId"),ne);
+		super.addWhere("trxId", trxPayMap.getString("trxId"),lt);
 		super.setOrderBy("trxId desc");
 		
 		RecordSet rset = super.search();
