@@ -574,8 +574,34 @@ public class TrxDAO extends DAO {
 		}
 		return val;
 	}
-	
-	
+
+	public int setReserveVactRate() {
+		int val =0;
+		String query = "SELECT FN_RESERVE_VACT_RATE() as val";
+
+		DBManager db = null;
+		PreparedStatement pstmt = null;
+		Connection conn = null;
+		ResultSet rset = null;
+
+		try {
+
+			db = DBFactory.getInstance();
+			conn = db.getConnection();
+			pstmt = conn.prepareStatement(query);
+			rset = pstmt.executeQuery();
+
+			while (rset.next()) {
+				val = rset.getInt(1);
+			}
+			conn.commit();
+		} catch (Exception t) {
+			logger.debug("sql error : {}, query : {}", t.getMessage(), query);
+		} finally {
+			db.close(conn, pstmt, rset);
+		}
+		return val;
+	}
 	
 	public SharedMap<String, Object> getTrxLoad() {
 		super.setTable("PG_TRX_LOAD");

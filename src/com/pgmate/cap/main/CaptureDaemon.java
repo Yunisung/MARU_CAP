@@ -41,14 +41,15 @@ public class CaptureDaemon extends Thread{
 					TrxDAO trxDAO = new TrxDAO();
 					
 					if(CommonUtil.getCurrentDate("HHmm").equals("0001")){
-						if(trxDAO.setReserveRate() > 0){
+						//가맹점, 가상계좌 수수료 예약 변경
+						if(trxDAO.setReserveRate() > 0 || trxDAO.setReserveVactRate() > 0){
 							logger.info("cache init");
 							for(String key : Cache.map.asMap().keySet()){
 								Cache.map.delete(key);
 								logger.info("cache delete : {}",key);
 							}
 						}
-						
+
 						// ------ 차감정산 추가 -------
 						String stlDay = trxDAO.getSettleDay(CommonUtil.getCurrentDate("yyyyMMdd"));
 						// 현재날짜 이전 정산대기건 다음 영업일로 변경
