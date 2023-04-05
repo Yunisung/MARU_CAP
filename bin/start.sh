@@ -19,7 +19,7 @@ CP=`echo $CP | cut -c2-`
 # JVM_ARGS for VM
 ##########################
 JVM_ARGS="-DMARU_CAP -server -DCP_CONF=../conf -Dlogback.configurationFile=../conf/logback.xml -Dfile.encoding=UTF-8"
-JVM_ARGS="$JVM_ARGS -Xss512k -Xms1024m -Xmx2048m"
+JVM_ARGS="$JVM_ARGS -Xss512k -Xms512m -Xmx1024m"
 JVM_ARGS="$JVM_ARGS -cp $CP"
 
 
