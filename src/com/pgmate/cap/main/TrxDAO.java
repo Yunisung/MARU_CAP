@@ -256,6 +256,24 @@ public class TrxDAO extends DAO {
 			}
 		}
 	}
+
+	public SharedMap<String, Object> getMchtRentByMchtId(String mchtId) {
+		super.setTable("PG_MCHT_RENT");
+		super.setColumns("*");
+		super.addWhere("mchtId", mchtId, eq);
+		RecordSet rset = super.search();
+		super.initRecord();
+		return rset.getRowFirst();
+	}
+
+	public SharedMap<String, Object> getTrxRentById(String rentId) {
+		super.setTable("PG_TRX_RENT");
+		super.setColumns("*");
+		super.addWhere("rentId", rentId, eq);
+		RecordSet rset = super.search();
+		super.initRecord();
+		return rset.getRowFirst();
+	}
 	
 	public SharedMap<String, Object> getMchtTmnDtlByTmnId(String tmnId) {
 		String key = "PG_MCHT_TMN_DTL_" + tmnId;
@@ -1181,5 +1199,55 @@ public class TrxDAO extends DAO {
 		RecordSet rset = super.query(q);
 		super.initRecord();
 		return rset.getRow(0).getString("status");
+	}
+
+	public String getRentFirstPaid(String mchtId){
+		/*super.setTable("PG_TRX_PAY A, PG_TRX_RENT B ");
+		super.setColumns("A.trxId");
+		super.setWhere("A.rentId = B.rentId");
+		super.addWhere("A.mchtId", mchtId, eq);
+		RecordSet rset = super.search();
+		super.initRecord();
+		if(rset.size() == 1){
+			return "월세최초결제";
+		}else{
+			return "";
+		}*/
+
+		super.setTable("PG_TRX_CAP");
+		super.setColumns("trxId");
+		super.addWhere("mchtId", mchtId, eq);
+		super.addWhere("serviceType", "월세앱", eq);
+		RecordSet rset = super.search();
+		super.initRecord();
+		if(rset.size() == 0){
+			return "월세최초결제";
+		}else{
+			return "";
+		}
+	}
+
+	public long getRentDaySum(String today, String mchtId) {
+		super.setTable("PG_TRX_CAP");
+		super.setColumns("SUM(amount) as totAmount");
+		super.addWhere("mchtId", mchtId, eq);
+		super.addWhere("capType", "매입", eq);
+		super.addWhere("trxDay", today, eq);
+		super.addWhere("serviceType", "월세앱", eq);
+		RecordSet rset = super.search();
+		super.initRecord();
+		return rset.getRowFirst().getLong("totAmount");
+	}
+
+	public long getRentMonthSum(String month, String mchtId) {
+		super.setTable("PG_TRX_CAP");
+		super.setColumns("SUM(amount) as totAmount");
+		super.addWhere("mchtId", mchtId, eq);
+		super.addWhere("capType", "매입", eq);
+		super.addWhere("substr(trxDay, 1, 6)", month, eq);
+		super.addWhere("serviceType", "월세앱", eq);
+		RecordSet rset = super.search();
+		super.initRecord();
+		return rset.getRowFirst().getLong("totAmount");
 	}
 }
