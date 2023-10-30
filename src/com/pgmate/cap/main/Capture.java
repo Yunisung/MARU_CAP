@@ -32,7 +32,8 @@ public class Capture {
 	private List<SharedMap<String,Object>> insertCapDtlList = new ArrayList<SharedMap<String,Object>>();
 	private List<SharedMap<String,Object>> insertCapSubList = new ArrayList<SharedMap<String,Object>>();
 	private List<SharedMap<String,Object>> insertChargeSettleList = new ArrayList<SharedMap<String,Object>>();
-	
+	private List<SharedMap<String,Object>> insertChargeSettleFirmList = new ArrayList<SharedMap<String,Object>>();
+
 	private List<String> warningList = new ArrayList<String>();
 	private List<String[]> riskList  = new ArrayList<String[]>();
 	
@@ -59,6 +60,7 @@ public class Capture {
 			logger.info("capture inserted : {}",trxBatchDAO.insertTrxCap(insertCapList, insertCapDtlList));
 			logger.info("capture sub inserted : {}",trxBatchDAO.insertTrxCapSub(insertCapSubList));
 			logger.info("capture charge inserted : {}",trxBatchDAO.insertChargeSettle(insertChargeSettleList));
+			logger.info("capture charge firm inserted : {}",trxBatchDAO.insertChargeSettleFirm(insertChargeSettleFirmList));
 			logger.info("");
 		}
 		
@@ -118,92 +120,92 @@ public class Capture {
 	}
 	
 	
-	public void capture(SharedMap<String,Object> trxPayMap){
-		SharedMap<String,Object> mchtMap		= trxDAO.getMchtByMchtId(trxPayMap.getString("mchtId"));
-		SharedMap<String,Object> mchtTmnMap		= trxDAO.getMchtTmnByTmnId(trxPayMap.getString("tmnId"));
-		SharedMap<String,Object> mchtMngMap		= trxDAO.getMchtMngByMchtId(mchtMap.getString("mchtId"));
-		SharedMap<String,Object> agencyMngMap	= trxDAO.getAgencyMngById(mchtMap.getString("agencyId"));
-		SharedMap<String,Object> distMngMap		= trxDAO.getDistMngById(mchtMap.getString("distId"));
-		SharedMap<String,Object> salesMngMap	= trxDAO.getSalesMngById(mchtMap.getString("salesId"));
-		SharedMap<String,Object> orgFeeMap		= trxDAO.getOrgFee(trxPayMap.getString("van"));
-		SharedMap<String,Object> mchtSvcMap 	= trxDAO.getRealTimeMchtSvc(trxPayMap.getString("mchtId"));
-		SharedMap<String,Object> mchtRentMap	= trxDAO.getMchtRentByMchtId(trxPayMap.getString("mchtId"));
-		SharedMap<String,Object> trxRentMap		= trxDAO.getTrxRentById(trxPayMap.getString("rentId"));
+	public void capture(SharedMap<String,Object> trxPayMap) {
+		SharedMap<String, Object> mchtMap = trxDAO.getMchtByMchtId(trxPayMap.getString("mchtId"));
+		SharedMap<String, Object> mchtTmnMap = trxDAO.getMchtTmnByTmnId(trxPayMap.getString("tmnId"));
+		SharedMap<String, Object> mchtMngMap = trxDAO.getMchtMngByMchtId(mchtMap.getString("mchtId"));
+		SharedMap<String, Object> agencyMngMap = trxDAO.getAgencyMngById(mchtMap.getString("agencyId"));
+		SharedMap<String, Object> distMngMap = trxDAO.getDistMngById(mchtMap.getString("distId"));
+		SharedMap<String, Object> salesMngMap = trxDAO.getSalesMngById(mchtMap.getString("salesId"));
+		SharedMap<String, Object> orgFeeMap = trxDAO.getOrgFee(trxPayMap.getString("van"));
+		SharedMap<String, Object> mchtSvcMap = trxDAO.getRealTimeMchtSvc(trxPayMap.getString("mchtId"));
+		SharedMap<String, Object> mchtRentMap = trxDAO.getMchtRentByMchtId(trxPayMap.getString("mchtId"));
+		SharedMap<String, Object> trxRentMap = trxDAO.getTrxRentById(trxPayMap.getString("rentId"));
 
-		
-		SharedMap<String,Object> trxCapMap = new SharedMap<String,Object>();
-		
-		trxCapMap.put("capId"		, trxDAO.getCapId());
-		trxCapMap.put("trxId"		, trxPayMap.getString("trxId"));
-		trxCapMap.put("mchtId"		, trxPayMap.getString("mchtId"));
-		trxCapMap.put("tmnId"		, trxPayMap.getString("tmnId"));
-		trxCapMap.put("trackId"		, trxPayMap.getString("trackId"));
-		trxCapMap.put("capType"		, "매입");
-		trxCapMap.put("rfdType"		, "");
-		trxCapMap.put("rootTrxId"	, "");
-		trxCapMap.put("rootTrxDay"	, "");
-		trxCapMap.put("amount"		, trxPayMap.getLong("amount"));
-		trxCapMap.put("installment"	, trxPayMap.getString("installment"));
-		
+
+		SharedMap<String, Object> trxCapMap = new SharedMap<String, Object>();
+
+		trxCapMap.put("capId", trxDAO.getCapId());
+		trxCapMap.put("trxId", trxPayMap.getString("trxId"));
+		trxCapMap.put("mchtId", trxPayMap.getString("mchtId"));
+		trxCapMap.put("tmnId", trxPayMap.getString("tmnId"));
+		trxCapMap.put("trackId", trxPayMap.getString("trackId"));
+		trxCapMap.put("capType", "매입");
+		trxCapMap.put("rfdType", "");
+		trxCapMap.put("rootTrxId", "");
+		trxCapMap.put("rootTrxDay", "");
+		trxCapMap.put("amount", trxPayMap.getLong("amount"));
+		trxCapMap.put("installment", trxPayMap.getString("installment"));
+
 		//PYS : 갤럭시아 면세용 단말기 M2247413
 		//PYS : KSNET 면세용 단말기 2010000009
-		if(trxPayMap.isEquals("vanId", "M2247413") || trxPayMap.isEquals("vanId", "2010000009") || trxPayMap.isEquals("vanId", "mtouch9")) {
-			trxCapMap.put("vat"			, 0);
-		}else{
-			trxCapMap.put("vat"			, calcRootVat(trxPayMap.getLong("amount")));
+		if (trxPayMap.isEquals("vanId", "M2247413") || trxPayMap.isEquals("vanId", "2010000009") || trxPayMap.isEquals("vanId", "mtouch9")) {
+			trxCapMap.put("vat", 0);
+		} else {
+			trxCapMap.put("vat", calcRootVat(trxPayMap.getLong("amount")));
 		}
 
 		// 서비스구분: 외부서비스(월세앱) 사용유무
 		boolean isRentApp = "사용".equals(mchtSvcMap.getString("rent")) && !trxRentMap.isNullOrSpace("rentId");
-		if(isRentApp) {
-			trxCapMap.put("serviceType"			, "월세앱");
+		if (isRentApp) {
+			trxCapMap.put("serviceType", "월세앱");
 		} else {
-			trxCapMap.put("serviceType"			, "일반");
+			trxCapMap.put("serviceType", "일반");
 		}
 
-		trxCapMap.put("cardId"		, trxPayMap.getString("cardId"));
-		trxCapMap.put("cardType"	, trxPayMap.getString("cardType"));
-		trxCapMap.put("bin"			, trxPayMap.getString("bin"));
-		trxCapMap.put("last4"		, trxPayMap.getString("last4"));
-		trxCapMap.put("issuer"		, trxPayMap.getString("issuer"));
-		trxCapMap.put("acquirer"	, trxPayMap.getString("acquirer"));
-		trxCapMap.put("authCd"		, trxPayMap.getString("authCd"));
-		trxCapMap.put("trxDay"		, trxPayMap.getString("regDay"));
-		trxCapMap.put("regDay"		, trxPayMap.getString("regDay"));
-		trxCapMap.put("regTime"		, trxPayMap.getString("regTime"));
-		trxCapMap.put("regDate"		, CommonUtil.getCurrentTimestamp());
-		
-		logger.info("capture capId : {},{}",trxCapMap.getString("capId"),trxPayMap.getString("trxId"));
+		trxCapMap.put("cardId", trxPayMap.getString("cardId"));
+		trxCapMap.put("cardType", trxPayMap.getString("cardType"));
+		trxCapMap.put("bin", trxPayMap.getString("bin"));
+		trxCapMap.put("last4", trxPayMap.getString("last4"));
+		trxCapMap.put("issuer", trxPayMap.getString("issuer"));
+		trxCapMap.put("acquirer", trxPayMap.getString("acquirer"));
+		trxCapMap.put("authCd", trxPayMap.getString("authCd"));
+		trxCapMap.put("trxDay", trxPayMap.getString("regDay"));
+		trxCapMap.put("regDay", trxPayMap.getString("regDay"));
+		trxCapMap.put("regTime", trxPayMap.getString("regTime"));
+		trxCapMap.put("regDate", CommonUtil.getCurrentTimestamp());
+
+		logger.info("capture capId : {},{}", trxCapMap.getString("capId"), trxPayMap.getString("trxId"));
 		//기본 매입 정로 리스트
 		insertCapList.add(trxCapMap);
-		
-		
-		SharedMap<String,Object> capDtlMap = new SharedMap<String,Object>();
-		
-		
+
+
+		SharedMap<String, Object> capDtlMap = new SharedMap<String, Object>();
+
+
 		//중복 거래 조회
 		capDtlMap.put("risk", "");
 
 		//24시간 중복 > 야간 할부 > 주간 할부 > 야간 건한도 > 주간 건한도 > 위험(100만원) > 최소금액 (1005원 미만) > 고액  (300만원)
 		//1일 중복 거래 
 		String dup = trxDAO.getDuplicatedDaily(trxCapMap);
-		if(!dup.equals("")){
-			capDtlMap.put("risk",dup);
+		if (!dup.equals("")) {
+			capDtlMap.put("risk", dup);
 		}
 		//중복거래
 		dup = trxDAO.getDuplicated(trxCapMap);
-		if(!dup.equals("")){
-			capDtlMap.put("risk",dup);
+		if (!dup.equals("")) {
+			capDtlMap.put("risk", dup);
 		}
-		
+
 		//야간할부 거래 
-		if(trxCapMap.getLong("regTime") < 60000 && trxCapMap.getLong("installment") > 0){
-			capDtlMap.put("risk","야간할부");
+		if (trxCapMap.getLong("regTime") < 60000 && trxCapMap.getLong("installment") > 0) {
+			capDtlMap.put("risk", "야간할부");
 		}
-		
+
 		//주간할부 거래 
-		if(trxCapMap.getLong("regTime") >= 60000 && trxCapMap.getLong("installment") > 6){
-			capDtlMap.put("risk","주간할부");
+		if (trxCapMap.getLong("regTime") >= 60000 && trxCapMap.getLong("installment") > 6) {
+			capDtlMap.put("risk", "주간할부");
 		}
 		
 		/* 22.10.05 건한도 설정 주석 처리 (calcRiskStatus에서 설정 됨)
@@ -217,154 +219,154 @@ public class Capture {
 			capDtlMap.put("risk","건한도");		
 		}
 		*/
-		
+
 		//위험,중복
-		if(!trxCapMap.isNullOrSpace("bin") && !trxCapMap.isNullOrSpace("last4")){
+		if (!trxCapMap.isNullOrSpace("bin") && !trxCapMap.isNullOrSpace("last4")) {
 			//위험 100 만원 이상 거래
 			String trxId = trxDAO.getWarningFact(trxPayMap);
-			if(!trxId.equals("")){
+			if (!trxId.equals("")) {
 				//22.10.25 warningList에 직전거래가 add되면 위험 리스크 설정이 되어 주석처리
 //				warningList.add(trxId);
-				capDtlMap.put("risk"	,"위험");
+				capDtlMap.put("risk", "위험");
 			}
 		}
-		
+
 		//기본 리스크 반영 최소금액/건한도/고액
-		String riskStatus = calcRiskStatus(trxCapMap.getLong("amount"),mchtMngMap);
-		if(!riskStatus.equals("")){
+		String riskStatus = calcRiskStatus(trxCapMap.getLong("amount"), mchtMngMap);
+		if (!riskStatus.equals("")) {
 			capDtlMap.put("risk", riskStatus);
 		}
 
 		// 월세앱 리스크 확인
-		if(isRentApp) {
+		if (isRentApp) {
 			// 최초거래건 체크 -> 검토중이면 보류
 			/*String firstPaid = trxDAO.getRentFirstPaid(trxPayMap.getString("mchtId"));
 			if(!firstPaid.equals("")){
 				capDtlMap.put("risk",firstPaid);
 			}*/
-			if("대기".equals(mchtRentMap.getString("contractStatus"))) {
+			if ("대기".equals(mchtRentMap.getString("contractStatus"))) {
 				capDtlMap.put("risk", "월세 최초결제");
 			}
 
 			String billingType = trxRentMap.getString("billingType");
 			long rentLimitOnce = 0;
 			long rentLimitMonth = 0;
-			if("월세".equals(billingType)) {
+			if ("월세".equals(billingType)) {
 				rentLimitOnce = mchtRentMap.getLong("rentLimitOnce");
 				rentLimitMonth = mchtRentMap.getLong("rentLimitMonth");
-			} else if("보증금".equals(billingType)) {
+			} else if ("보증금".equals(billingType)) {
 				rentLimitOnce = mchtRentMap.getLong("depositLimitOnce");
 				rentLimitMonth = mchtRentMap.getLong("depositLimitMonth");
 			}
 
 			// 1회한도
-			if(rentLimitOnce > 0) {
+			if (rentLimitOnce > 0) {
 				if (rentLimitOnce < trxCapMap.getLong("amount")) {
 					capDtlMap.put("risk", "월세 1회한도");
 				}
 			}
 
 			// 월한도
-			if(rentLimitMonth > 0) {
+			if (rentLimitMonth > 0) {
 				long monthSum = trxDAO.getRentMonthSum(CommonUtil.getCurrentDate("yyyyMM"), trxPayMap.getString("mchtId"));
 				if (rentLimitMonth < trxCapMap.getLong("amount") + monthSum) {
 					capDtlMap.put("risk", "월세 월한도");
 				}
 			}
 
-			capDtlMap.put("transferDay"		, trxRentMap.getString("transferDay"));
-			capDtlMap.put("billingMethod"	, trxRentMap.getString("billingMethod"));
-			capDtlMap.put("billingType"		, trxRentMap.getString("billingType"));
+			capDtlMap.put("transferDay", trxRentMap.getString("transferDay"));
+			capDtlMap.put("billingMethod", trxRentMap.getString("billingMethod"));
+			capDtlMap.put("billingType", trxRentMap.getString("billingType"));
 		}
-		
-		if(!capDtlMap.isNullOrSpace("risk")){
-			logger.info("capId : {}, risk : {}",trxCapMap.getString("capId"),capDtlMap.getString("risk"));
-			String[] riskData = {trxCapMap.getString("capId"),trxCapMap.getString("capId")+":RISK 설정 ,D+1 "+capDtlMap.getString("risk")+",수수료:"+(capDtlMap.getLong("stlFee")+capDtlMap.getLong("stlFeeVat"))};
+
+		if (!capDtlMap.isNullOrSpace("risk")) {
+			logger.info("capId : {}, risk : {}", trxCapMap.getString("capId"), capDtlMap.getString("risk"));
+			String[] riskData = {trxCapMap.getString("capId"), trxCapMap.getString("capId") + ":RISK 설정 ,D+1 " + capDtlMap.getString("risk") + ",수수료:" + (capDtlMap.getLong("stlFee") + capDtlMap.getLong("stlFeeVat"))};
 			riskList.add(riskData);
 		}
-		
-		capDtlMap.put("capId"		, trxCapMap.getString("capId"));
-		capDtlMap.put("stlStatus"	, "정산대기");
+
+		capDtlMap.put("capId", trxCapMap.getString("capId"));
+		capDtlMap.put("stlStatus", "정산대기");
 		capDtlMap.put("stlLoanRate", mchtMngMap.getDouble("loanRate"));
-		
+
 		double vanInterRate = 0;
 		double stlInterRate = 0;
-		
-		
-		if(mchtMngMap.getString("interType").equals("사용") && !trxCapMap.getString("installment").equals("00") && trxPayMap.isEquals("vanId", "2006500009")) {
+
+
+		if (mchtMngMap.getString("interType").equals("사용") && !trxCapMap.getString("installment").equals("00") && trxPayMap.isEquals("vanId", "2006500009")) {
 			// 가맹점 상점부담 무이자 수수료율 가져오기
-			stlInterRate = trxDAO.getMchtInterFeeRate(trxCapMap).getDouble("m"+trxCapMap.getString("installment"));
+			stlInterRate = trxDAO.getMchtInterFeeRate(trxCapMap).getDouble("m" + trxCapMap.getString("installment"));
 			capDtlMap.put("stlInterRate", stlInterRate);
-		
-			SharedMap<String, Object> orgInterMap = trxDAO.getOrgInterRate(mchtTmnMap.getString("van"),trxCapMap.getString("acquirer"));
-			vanInterRate = orgInterMap.getDouble("m"+trxCapMap.getString("installment"));
+
+			SharedMap<String, Object> orgInterMap = trxDAO.getOrgInterRate(mchtTmnMap.getString("van"), trxCapMap.getString("acquirer"));
+			vanInterRate = orgInterMap.getDouble("m" + trxCapMap.getString("installment"));
 			capDtlMap.put("stlVanInterRate", vanInterRate);
 		}
-		
-		if(trxPayMap.isEquals("vanId","OFFLINE")){
-			double normalRate 	= 0;
-			
-			if(mchtMngMap.getDouble("rate") == 0.008){
-				if(trxCapMap.isEquals("cardType", "체크")){
-					normalRate 	= 0.005;
-				}else{
-					normalRate 	= 0.008;
+
+		if (trxPayMap.isEquals("vanId", "OFFLINE")) {
+			double normalRate = 0;
+
+			if (mchtMngMap.getDouble("rate") == 0.008) {
+				if (trxCapMap.isEquals("cardType", "체크")) {
+					normalRate = 0.005;
+				} else {
+					normalRate = 0.008;
 				}
-			}else if(mchtMngMap.getDouble("rate") == 0.013){
-				if(trxCapMap.isEquals("cardType", "체크")){
-					normalRate 	= 0.01;
-				}else{
-					normalRate 	= 0.013;
+			} else if (mchtMngMap.getDouble("rate") == 0.013) {
+				if (trxCapMap.isEquals("cardType", "체크")) {
+					normalRate = 0.01;
+				} else {
+					normalRate = 0.013;
 				}
-			}else{
+			} else {
 				//여기서부터는 설계
 			}
 			//OFFLINE  거래는 노멀 수수료 + loanRate 
-			
-			if(mchtMngMap.getString("settleType").equals("D+1") && capDtlMap.isNullOrSpace("risk")){	//D+1 리스크 없는 거래 
-				capDtlMap.put("stlRate"		, normalRate+capDtlMap.getDouble("stlLoanRate")+stlInterRate);			//가맹점 수수료 + 선정산 수수료 
-				capDtlMap.put("stlType"     , mchtMngMap.getString("settleType"));						//정산기간 
-				long normalFee 				= calcFee(trxCapMap.getLong("amount"), normalRate);			//일반 수수료 산정
-				long loanFee	 			= calcFee(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlLoanRate"));	//선정산 수수료 산정
-				long loanFeeVat				= calcVat(loanFee);											//선정산 수수료에 대해서만 부가세 적용
-				capDtlMap.put("stlFee"		, normalFee+loanFee);
-				capDtlMap.put("stlFeeVat"	, loanFeeVat);
-			}else{																						//D+1 이 아닌 리스크 없는 거래 
-				capDtlMap.put("stlRate"		, normalRate + stlInterRate);												//가맹점 수수료만 적용 
-				capDtlMap.put("stlType"     , mchtMngMap.getString("settleType"));						//정산기간
-				capDtlMap.put("stlFee"		, calcFee(trxCapMap.getLong("amount"), normalRate));		//일반 수수료만적용
-				capDtlMap.put("stlFeeVat"	, 0);														//일반 수수료에 부가세 없음.
-			}
-			capDtlMap.put("stlAmount"	, trxCapMap.getLong("amount")-capDtlMap.getLong("stlFee")-capDtlMap.getLong("stlFeeVat"));
-			
-		}else{
 
-			if(isRentApp) {
+			if (mchtMngMap.getString("settleType").equals("D+1") && capDtlMap.isNullOrSpace("risk")) {    //D+1 리스크 없는 거래
+				capDtlMap.put("stlRate", normalRate + capDtlMap.getDouble("stlLoanRate") + stlInterRate);            //가맹점 수수료 + 선정산 수수료
+				capDtlMap.put("stlType", mchtMngMap.getString("settleType"));                        //정산기간
+				long normalFee = calcFee(trxCapMap.getLong("amount"), normalRate);            //일반 수수료 산정
+				long loanFee = calcFee(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlLoanRate"));    //선정산 수수료 산정
+				long loanFeeVat = calcVat(loanFee);                                            //선정산 수수료에 대해서만 부가세 적용
+				capDtlMap.put("stlFee", normalFee + loanFee);
+				capDtlMap.put("stlFeeVat", loanFeeVat);
+			} else {                                                                                        //D+1 이 아닌 리스크 없는 거래
+				capDtlMap.put("stlRate", normalRate + stlInterRate);                                                //가맹점 수수료만 적용
+				capDtlMap.put("stlType", mchtMngMap.getString("settleType"));                        //정산기간
+				capDtlMap.put("stlFee", calcFee(trxCapMap.getLong("amount"), normalRate));        //일반 수수료만적용
+				capDtlMap.put("stlFeeVat", 0);                                                        //일반 수수료에 부가세 없음.
+			}
+			capDtlMap.put("stlAmount", trxCapMap.getLong("amount") - capDtlMap.getLong("stlFee") - capDtlMap.getLong("stlFeeVat"));
+
+		} else {
+
+			if (isRentApp) {
 				// 월세앱일 경우
 
 				// 월세앱은 선지급 수수료 제외
 				String billingType = trxRentMap.getString("billingType");
 				String contractType = trxRentMap.getString("contractType");
 				double rentRate = 0.0;
-				if("월세".equals(billingType)) {
+				if ("월세".equals(billingType)) {
 					rentRate = mchtRentMap.getDouble("rentRate");
-				} else if("보증금".equals(billingType)) {
+				} else if ("보증금".equals(billingType)) {
 					rentRate = mchtRentMap.getDouble("depositRate");
 				}
-				capDtlMap.put("stlRate"		, rentRate + stlInterRate);
-				capDtlMap.put("stlType"     , mchtRentMap.getString("settleType"));
+				capDtlMap.put("stlRate", rentRate + stlInterRate);
+				capDtlMap.put("stlType", mchtRentMap.getString("settleType"));
 
-				if("임차인".equals(contractType)) {
+				if ("임차인".equals(contractType)) {
 					//임차일경우
 					// 정산금액 = 거래금액 * ((1000/ (1000 + 44))
 					long rentStlAmount = calcRentStlAmount(trxCapMap.getLong("amount"), capDtlMap.getLong("stlRate"));
-					capDtlMap.put("stlFee"		, calcFee(rentStlAmount, capDtlMap.getDouble("stlRate")));
-					capDtlMap.put("stlFeeVat"	, calcVat(capDtlMap.getLong("stlFee")));
-					capDtlMap.put("stlAmount"	, rentStlAmount);
+					capDtlMap.put("stlFee", calcFee(rentStlAmount, capDtlMap.getDouble("stlRate")));
+					capDtlMap.put("stlFeeVat", calcVat(capDtlMap.getLong("stlFee")));
+					capDtlMap.put("stlAmount", rentStlAmount);
 				} else {
-					capDtlMap.put("stlFee"		, calcFee(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlRate")));
-					capDtlMap.put("stlFeeVat"	, calcVat(capDtlMap.getLong("stlFee")));
-					capDtlMap.put("stlAmount"	, trxCapMap.getLong("amount") - capDtlMap.getLong("stlFee") - capDtlMap.getLong("stlFeeVat"));
+					capDtlMap.put("stlFee", calcFee(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlRate")));
+					capDtlMap.put("stlFeeVat", calcVat(capDtlMap.getLong("stlFee")));
+					capDtlMap.put("stlAmount", trxCapMap.getLong("amount") - capDtlMap.getLong("stlFee") - capDtlMap.getLong("stlFeeVat"));
 				}
 
 			} else {
@@ -373,26 +375,25 @@ public class Capture {
 				} else {                                                                                        //D+1 이 아닌 경우 또는 RISK가 있는 경우는 원 수수료를 청구한다.
 					capDtlMap.put("stlRate", mchtMngMap.getDouble("rate") + stlInterRate);
 				}
-				capDtlMap.put("stlType"     , mchtMngMap.getString("settleType"));
-				capDtlMap.put("stlFee"		, calcFee(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlRate")));
-				capDtlMap.put("stlFeeVat"	, calcVat(capDtlMap.getLong("stlFee")));
+				capDtlMap.put("stlType", mchtMngMap.getString("settleType"));
+				capDtlMap.put("stlFee", calcFee(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlRate")));
+				capDtlMap.put("stlFeeVat", calcVat(capDtlMap.getLong("stlFee")));
 
-				capDtlMap.put("stlAmount"	, trxCapMap.getLong("amount")-capDtlMap.getLong("stlFee")-capDtlMap.getLong("stlFeeVat"));
+				capDtlMap.put("stlAmount", trxCapMap.getLong("amount") - capDtlMap.getLong("stlFee") - capDtlMap.getLong("stlFeeVat"));
 			}
 
 		}
-		
-		
 
-		capDtlMap.put("stlDay"		, calcDay(capDtlMap.getString("stlType"), trxCapMap.getString("trxDay")));
-		capDtlMap.put("payOutDay"	, "");
-		capDtlMap.put("stlId"		, "");
+
+		capDtlMap.put("stlDay", calcDay(capDtlMap.getString("stlType"), trxCapMap.getString("trxDay")));
+		capDtlMap.put("payOutDay", "");
+		capDtlMap.put("stlId", "");
 
 
 		// 영업라인 수수료 계산
-		if(isRentApp) {
+		if (isRentApp) {
 			// 월세앱 경우 에이전시, 지사 일반 수수료는 0으로 한다.
-			capDtlMap.put("stlAgencyRate", 0);
+			/*capDtlMap.put("stlAgencyRate", 0);
 			capDtlMap.put("stlAgencyFee", 0);
 			capDtlMap.put("stlAgencyDay", calcDay(agencyMngMap.getString("settleType"),trxCapMap.getString("trxDay")));
 			capDtlMap.put("stlAgencyId"	, "");
@@ -400,167 +401,177 @@ public class Capture {
 			capDtlMap.put("stlSalesRate", 0);
 			capDtlMap.put("stlSalesFee"	, 0);
 			capDtlMap.put("stlSalesDay"	, calcDay(salesMngMap.getString("settleType"),trxCapMap.getString("trxDay")));
-			capDtlMap.put("stlSalesId"	, "");
+			capDtlMap.put("stlSalesId"	, "");*/
 
 			String billingType = trxRentMap.getString("billingType");
 			double distRentRate = 0.0;
-			if("월세".equals(billingType)) {
+			if ("월세".equals(billingType)) {
 				distRentRate = mchtRentMap.getDouble("distRentRate");
-			} else if("보증금".equals(billingType)) {
+			} else if ("보증금".equals(billingType)) {
 				distRentRate = mchtRentMap.getDouble("distDepositRate");
 			}
-			capDtlMap.put("stlDistRate"	, distRentRate);
 
-			if(capDtlMap.getDouble("stlDistRate") < 0){
-				capDtlMap.put("stlDistFee"	, 0);
-			}else{
-				capDtlMap.put("stlDistFee"	, calcFeeVat(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlDistRate")));
+			if (distMngMap.size() > 0) {
+				capDtlMap.put("stlDistRate", distRentRate);
+				if (capDtlMap.getDouble("stlDistRate") < 0) {
+					capDtlMap.put("stlDistFee", 0);
+				} else {
+					capDtlMap.put("stlDistFee", calcFeeVat(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlDistRate")));
+				}
+				capDtlMap.put("stlDistDay", calcDay(distMngMap.getString("settleType"), trxCapMap.getString("trxDay")));
+				capDtlMap.put("stlDistId", "");
 			}
-			capDtlMap.put("stlDistDay"	, calcDay(distMngMap.getString("settleType"),trxCapMap.getString("trxDay")));
-			capDtlMap.put("stlDistId"	, "");
 
 		} else {
-			if(agencyMngMap.size() >0 ){
-				capDtlMap.put("stlAgencyRate", mchtMngMap.getDouble("rate")-mchtMngMap.getDouble("agencyRate"));
+			if (agencyMngMap.size() > 0) {
+				capDtlMap.put("stlAgencyRate", mchtMngMap.getDouble("rate") - mchtMngMap.getDouble("agencyRate"));
 				capDtlMap.put("stlAgencyFee", calcFeeVat(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlAgencyRate")));
-				capDtlMap.put("stlAgencyDay", calcDay(agencyMngMap.getString("settleType"),trxCapMap.getString("trxDay")));
-				capDtlMap.put("stlAgencyId"	, "");
+				capDtlMap.put("stlAgencyDay", calcDay(agencyMngMap.getString("settleType"), trxCapMap.getString("trxDay")));
+				capDtlMap.put("stlAgencyId", "");
 			}
 
-			if(salesMngMap.size() >0 ){
+			if (salesMngMap.size() > 0) {
 				capDtlMap.put("stlSalesRate", mchtMngMap.getDouble("salesRate"));
-				capDtlMap.put("stlSalesFee"	, calcFee(capDtlMap.getLong("stlAgencyFee"), capDtlMap.getDouble("stlSalesRate")));
-				capDtlMap.put("stlSalesDay"	, calcDay(salesMngMap.getString("settleType"),trxCapMap.getString("trxDay")));
-				capDtlMap.put("stlSalesId"	, "");
+				capDtlMap.put("stlSalesFee", calcFee(capDtlMap.getLong("stlAgencyFee"), capDtlMap.getDouble("stlSalesRate")));
+				capDtlMap.put("stlSalesDay", calcDay(salesMngMap.getString("settleType"), trxCapMap.getString("trxDay")));
+				capDtlMap.put("stlSalesId", "");
 			}
 
-			if(distMngMap.size() >0 ){
-				capDtlMap.put("stlDistRate"	, mchtMngMap.getDouble("agencyRate")-mchtMngMap.getDouble("distRate"));
-				if(capDtlMap.getDouble("stlDistRate") < 0){
-					capDtlMap.put("stlDistFee"	, 0);
-				}else{
-					capDtlMap.put("stlDistFee"	, calcFeeVat(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlDistRate")));
+			if (distMngMap.size() > 0) {
+				capDtlMap.put("stlDistRate", mchtMngMap.getDouble("agencyRate") - mchtMngMap.getDouble("distRate"));
+				if (capDtlMap.getDouble("stlDistRate") < 0) {
+					capDtlMap.put("stlDistFee", 0);
+				} else {
+					capDtlMap.put("stlDistFee", calcFeeVat(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlDistRate")));
 				}
-				capDtlMap.put("stlDistDay"	, calcDay(distMngMap.getString("settleType"),trxCapMap.getString("trxDay")));
-				capDtlMap.put("stlDistId"	, "");
+				capDtlMap.put("stlDistDay", calcDay(distMngMap.getString("settleType"), trxCapMap.getString("trxDay")));
+				capDtlMap.put("stlDistId", "");
 			}
 		}
 		// 에이전시 최종 수수료 : 에이전시 수수료 - 지사 수수료
-		capDtlMap.put("stlAgencyFee", capDtlMap.getLong("stlAgencyFee")-capDtlMap.getLong("stlSalesFee"));
+		capDtlMap.put("stlAgencyFee", capDtlMap.getLong("stlAgencyFee") - capDtlMap.getLong("stlSalesFee"));
 
 
-		capDtlMap.put("van"			, trxPayMap.getString("van"));
-		capDtlMap.put("vanId"		, trxPayMap.getString("vanId"));
-		capDtlMap.put("vanTrxId"	, trxPayMap.getString("vanTrxId"));
-		capDtlMap.put("vanStatus"	, "입금대기");
-		if(orgFeeMap.size() >0){
-			if(capDtlMap.isEquals("vanId", "OFFLINE")){
-				if(trxCapMap.isEquals("cardType", "체크")){
-					capDtlMap.put("stlVanRate"	, orgFeeMap.getDouble("checkRate")+vanInterRate);					//체크 수수료 적용
-				}else{
-					capDtlMap.put("stlVanRate"	, orgFeeMap.getDouble("creditRate")+vanInterRate);					//신용 수수료 적용 
+		capDtlMap.put("van", trxPayMap.getString("van"));
+		capDtlMap.put("vanId", trxPayMap.getString("vanId"));
+		capDtlMap.put("vanTrxId", trxPayMap.getString("vanTrxId"));
+		capDtlMap.put("vanStatus", "입금대기");
+		if (orgFeeMap.size() > 0) {
+			if (capDtlMap.isEquals("vanId", "OFFLINE")) {
+				if (trxCapMap.isEquals("cardType", "체크")) {
+					capDtlMap.put("stlVanRate", orgFeeMap.getDouble("checkRate") + vanInterRate);                    //체크 수수료 적용
+				} else {
+					capDtlMap.put("stlVanRate", orgFeeMap.getDouble("creditRate") + vanInterRate);                    //신용 수수료 적용
 				}
-				capDtlMap.put("stlVanFee"	, calcDefaultFee(trxCapMap.getLong("amount"),capDtlMap.getDouble("stlVanRate")));
-				
-			}else{
-				capDtlMap.put("stlVanRate"	, orgFeeMap.getDouble("creditRate")+vanInterRate);
-				if(capDtlMap.isEquals("van", "DANAL")){
-					capDtlMap.put("stlVanFee"	, calcDanalFeeVat(trxCapMap.getLong("amount"),orgFeeMap.getDouble("creditRate")+vanInterRate));
-				}else if(capDtlMap.startsWith("van", "DAOU") ){
-					
+				capDtlMap.put("stlVanFee", calcDefaultFee(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlVanRate")));
+
+			} else {
+				capDtlMap.put("stlVanRate", orgFeeMap.getDouble("creditRate") + vanInterRate);
+				if (capDtlMap.isEquals("van", "DANAL")) {
+					capDtlMap.put("stlVanFee", calcDanalFeeVat(trxCapMap.getLong("amount"), orgFeeMap.getDouble("creditRate") + vanInterRate));
+				} else if (capDtlMap.startsWith("van", "DAOU")) {
+
 					//if(mchtTmnMap.getString("ccType").equals("분리") && trxPayMap.getString("cardType").equals("체크") && !trxPayMap.getString("vanId").equals("FACTORING")){
-					if(trxPayMap.getString("cardType").equals("체크") && !trxPayMap.getString("vanId").equals("FACTORING") && !mchtMap.getString("distId").equals("16")){
-						logger.info("DAOU PG RATE 분리 적용 CTYPE :{},CHECK :{},{}",trxPayMap.getString("cardType"),orgFeeMap.getDouble("checkRate"),trxPayMap.getString("vanId"));
-						logger.info("DAOU 거래번호 capId :{}",trxCapMap.getString("capId"));
-						capDtlMap.put("stlVanRate"	, orgFeeMap.getDouble("checkRate")+vanInterRate);
-						capDtlMap.put("stlVanFee"	, calcRoundUpFeeVat(trxCapMap.getLong("amount"),orgFeeMap.getDouble("checkRate")+vanInterRate));
-					}else{
-						capDtlMap.put("stlVanFee"	, calcRoundUpFeeVat(trxCapMap.getLong("amount"),orgFeeMap.getDouble("creditRate")+vanInterRate));
+					if (trxPayMap.getString("cardType").equals("체크") && !trxPayMap.getString("vanId").equals("FACTORING") && !mchtMap.getString("distId").equals("16")) {
+						logger.info("DAOU PG RATE 분리 적용 CTYPE :{},CHECK :{},{}", trxPayMap.getString("cardType"), orgFeeMap.getDouble("checkRate"), trxPayMap.getString("vanId"));
+						logger.info("DAOU 거래번호 capId :{}", trxCapMap.getString("capId"));
+						capDtlMap.put("stlVanRate", orgFeeMap.getDouble("checkRate") + vanInterRate);
+						capDtlMap.put("stlVanFee", calcRoundUpFeeVat(trxCapMap.getLong("amount"), orgFeeMap.getDouble("checkRate") + vanInterRate));
+					} else {
+						capDtlMap.put("stlVanFee", calcRoundUpFeeVat(trxCapMap.getLong("amount"), orgFeeMap.getDouble("creditRate") + vanInterRate));
 					}
-				}else if(capDtlMap.isEquals("van", "SBANK")){
-					capDtlMap.put("stlVanFee"	, calcRoundTrimFeeVat(trxCapMap.getLong("amount"),orgFeeMap.getDouble("creditRate")+vanInterRate));
-				}else if(capDtlMap.getString("van").startsWith("KSPAY")){
-					capDtlMap.put("stlVanFee"	, calcKsnetFeeVat(trxCapMap.getLong("amount"),orgFeeMap.getDouble("creditRate")+vanInterRate));
-				}else if(capDtlMap.getString("van").startsWith("NICE")){
-					capDtlMap.put("stlVanFee"	, calcNiceFeeVat(trxCapMap.getLong("amount"),orgFeeMap.getDouble("creditRate")+vanInterRate));
-				}else if(capDtlMap.getString("van").startsWith("ALLAT")){
-					capDtlMap.put("stlVanFee"	, calcRoundUpFeeVat(trxCapMap.getLong("amount"),orgFeeMap.getDouble("creditRate")+vanInterRate));
-				}else{
-					capDtlMap.put("stlVanFee"	, calcDefaultFeeVat(trxCapMap.getLong("amount"),orgFeeMap.getDouble("creditRate")+vanInterRate));
+				} else if (capDtlMap.isEquals("van", "SBANK")) {
+					capDtlMap.put("stlVanFee", calcRoundTrimFeeVat(trxCapMap.getLong("amount"), orgFeeMap.getDouble("creditRate") + vanInterRate));
+				} else if (capDtlMap.getString("van").startsWith("KSPAY")) {
+					capDtlMap.put("stlVanFee", calcKsnetFeeVat(trxCapMap.getLong("amount"), orgFeeMap.getDouble("creditRate") + vanInterRate));
+				} else if (capDtlMap.getString("van").startsWith("NICE")) {
+					capDtlMap.put("stlVanFee", calcNiceFeeVat(trxCapMap.getLong("amount"), orgFeeMap.getDouble("creditRate") + vanInterRate));
+				} else if (capDtlMap.getString("van").startsWith("ALLAT")) {
+					capDtlMap.put("stlVanFee", calcRoundUpFeeVat(trxCapMap.getLong("amount"), orgFeeMap.getDouble("creditRate") + vanInterRate));
+				} else {
+					capDtlMap.put("stlVanFee", calcDefaultFeeVat(trxCapMap.getLong("amount"), orgFeeMap.getDouble("creditRate") + vanInterRate));
 				}
 			}
-			
+
 			// 영중소 가맹점 수수료 추가 
 			//PYS : 부국위너스 영중소 VANID로 변경 2010000007, 2010000008
-			if(!mchtMngMap.getString("diffType").equals("일반") &&
+			if (!mchtMngMap.getString("diffType").equals("일반") &&
 					(capDtlMap.getString("van").startsWith("KSPAY") && (trxPayMap.isEquals("vanId", "2010000007") || trxPayMap.isEquals("vanId", "2010000008"))) ||
 					(capDtlMap.getString("van").startsWith("GALAXIA") && (trxPayMap.isEquals("vanId", "M2245697") || trxPayMap.isEquals("vanId", "M2253623") || trxPayMap.isEquals("vanId", "M2253625")))) {
 				double diffRate = 0;
 				double stlDiffAgencyRate = 0;
 				double stlDiffDistRate = 0;
 				double stlDiffSalesRate = 0;
-				
-				if(trxPayMap.getString("cardType").equals("체크") || trxPayMap.getString("cardType").equals("기프트카드") || trxPayMap.getString("cardType").equals("선불") || trxPayMap.getString("cardType").equals("구매") ) {
-					switch(mchtMngMap.getString("diffType")) {
-						case "영세":	diffRate = orgFeeMap.getDouble("diff1CheckRate");
-								   	stlDiffAgencyRate = mchtMngMap.getDouble("diff0CheckAgencyRate");
-								   	stlDiffDistRate = mchtMngMap.getDouble("diff0CheckDistRate");
-								   	stlDiffSalesRate = mchtMngMap.getDouble("diff0CheckSalesRate");
-								   	break;
-						case "중소1": diffRate = orgFeeMap.getDouble("diff2CheckRate");
-									 stlDiffAgencyRate = mchtMngMap.getDouble("diff1CheckAgencyRate");
-									 stlDiffDistRate = mchtMngMap.getDouble("diff1CheckDistRate");
-									 stlDiffSalesRate = mchtMngMap.getDouble("diff1ChecSaleskRate");
-									 break;
-						case "중소2": diffRate = orgFeeMap.getDouble("diff3CheckRate");
-									 stlDiffAgencyRate = mchtMngMap.getDouble("diff2CheckAgencyRate");
-									 stlDiffDistRate = mchtMngMap.getDouble("diff2CheckDistRate");
-									 stlDiffSalesRate = mchtMngMap.getDouble("diff2CheckSalesRate");
-									 break;
-						case "중소3": diffRate = orgFeeMap.getDouble("diff4CheckRate");
-									 stlDiffAgencyRate = mchtMngMap.getDouble("diff3CheckAgencyRate");
-									 stlDiffDistRate = mchtMngMap.getDouble("diff3CheckDistRate");
-									 stlDiffSalesRate = mchtMngMap.getDouble("diff3CheckRate");
-									 break;
+
+				if (trxPayMap.getString("cardType").equals("체크") || trxPayMap.getString("cardType").equals("기프트카드") || trxPayMap.getString("cardType").equals("선불") || trxPayMap.getString("cardType").equals("구매")) {
+					switch (mchtMngMap.getString("diffType")) {
+						case "영세":
+							diffRate = orgFeeMap.getDouble("diff1CheckRate");
+							stlDiffAgencyRate = mchtMngMap.getDouble("diff0CheckAgencyRate");
+							stlDiffDistRate = mchtMngMap.getDouble("diff0CheckDistRate");
+							stlDiffSalesRate = mchtMngMap.getDouble("diff0CheckSalesRate");
+							break;
+						case "중소1":
+							diffRate = orgFeeMap.getDouble("diff2CheckRate");
+							stlDiffAgencyRate = mchtMngMap.getDouble("diff1CheckAgencyRate");
+							stlDiffDistRate = mchtMngMap.getDouble("diff1CheckDistRate");
+							stlDiffSalesRate = mchtMngMap.getDouble("diff1ChecSaleskRate");
+							break;
+						case "중소2":
+							diffRate = orgFeeMap.getDouble("diff3CheckRate");
+							stlDiffAgencyRate = mchtMngMap.getDouble("diff2CheckAgencyRate");
+							stlDiffDistRate = mchtMngMap.getDouble("diff2CheckDistRate");
+							stlDiffSalesRate = mchtMngMap.getDouble("diff2CheckSalesRate");
+							break;
+						case "중소3":
+							diffRate = orgFeeMap.getDouble("diff4CheckRate");
+							stlDiffAgencyRate = mchtMngMap.getDouble("diff3CheckAgencyRate");
+							stlDiffDistRate = mchtMngMap.getDouble("diff3CheckDistRate");
+							stlDiffSalesRate = mchtMngMap.getDouble("diff3CheckRate");
+							break;
 					}
-				}else {
-					switch(mchtMngMap.getString("diffType")) {
-						case "영세": diffRate = orgFeeMap.getDouble("diff1Rate");
-									stlDiffAgencyRate = mchtMngMap.getDouble("diff0AgencyRate");
-									stlDiffDistRate = mchtMngMap.getDouble("diff0DistRate");
-									stlDiffSalesRate = mchtMngMap.getDouble("diff0SalesRate");
-									 break;
-						case "중소1": diffRate = orgFeeMap.getDouble("diff2Rate");
-									 stlDiffAgencyRate = mchtMngMap.getDouble("diff1AgencyRate");
-									 stlDiffDistRate = mchtMngMap.getDouble("diff1DistRate");
-									 stlDiffSalesRate = mchtMngMap.getDouble("diff1SalesRate");
-									 break;
-						case "중소2": diffRate = orgFeeMap.getDouble("diff3Rate");
-									 stlDiffAgencyRate = mchtMngMap.getDouble("diff2AgencyRate");
-									 stlDiffDistRate = mchtMngMap.getDouble("diff2DistRate");
-									 stlDiffSalesRate = mchtMngMap.getDouble("diff2SalesRate");
-									 break;
-						case "중소3": diffRate = orgFeeMap.getDouble("diff4Rate");
-									 stlDiffAgencyRate = mchtMngMap.getDouble("diff3AgencyRate");
-									 stlDiffDistRate = mchtMngMap.getDouble("diff3DistRate");
-									 stlDiffSalesRate = mchtMngMap.getDouble("diff3SalesRate");
-									 break;
-					}		
+				} else {
+					switch (mchtMngMap.getString("diffType")) {
+						case "영세":
+							diffRate = orgFeeMap.getDouble("diff1Rate");
+							stlDiffAgencyRate = mchtMngMap.getDouble("diff0AgencyRate");
+							stlDiffDistRate = mchtMngMap.getDouble("diff0DistRate");
+							stlDiffSalesRate = mchtMngMap.getDouble("diff0SalesRate");
+							break;
+						case "중소1":
+							diffRate = orgFeeMap.getDouble("diff2Rate");
+							stlDiffAgencyRate = mchtMngMap.getDouble("diff1AgencyRate");
+							stlDiffDistRate = mchtMngMap.getDouble("diff1DistRate");
+							stlDiffSalesRate = mchtMngMap.getDouble("diff1SalesRate");
+							break;
+						case "중소2":
+							diffRate = orgFeeMap.getDouble("diff3Rate");
+							stlDiffAgencyRate = mchtMngMap.getDouble("diff2AgencyRate");
+							stlDiffDistRate = mchtMngMap.getDouble("diff2DistRate");
+							stlDiffSalesRate = mchtMngMap.getDouble("diff2SalesRate");
+							break;
+						case "중소3":
+							diffRate = orgFeeMap.getDouble("diff4Rate");
+							stlDiffAgencyRate = mchtMngMap.getDouble("diff3AgencyRate");
+							stlDiffDistRate = mchtMngMap.getDouble("diff3DistRate");
+							stlDiffSalesRate = mchtMngMap.getDouble("diff3SalesRate");
+							break;
+					}
 				}
-				
+
 				long stlDiffAgencyFee = calcFeeVat(trxCapMap.getLong("amount"), stlDiffAgencyRate);
 				long stlDiffDistFee = calcFeeVat(trxCapMap.getLong("amount"), stlDiffDistRate);
-				
-				capDtlMap.put("stlDiffAgencyRate",stlDiffAgencyRate);
-				capDtlMap.put("stlDiffAgencyFee",stlDiffAgencyFee);
-				capDtlMap.put("stlDiffDistRate",stlDiffDistRate);
-				capDtlMap.put("stlDiffDistFee",stlDiffDistFee);
+
+				capDtlMap.put("stlDiffAgencyRate", stlDiffAgencyRate);
+				capDtlMap.put("stlDiffAgencyFee", stlDiffAgencyFee);
+				capDtlMap.put("stlDiffDistRate", stlDiffDistRate);
+				capDtlMap.put("stlDiffDistFee", stlDiffDistFee);
 				capDtlMap.put("stlDiffSalesRate", stlDiffSalesRate);
-				capDtlMap.put("stlDiffSalesFee"	, calcFee(capDtlMap.getLong("stlDiffAgencyFee"), capDtlMap.getDouble("stlDiffSalesRate")));
-				
+				capDtlMap.put("stlDiffSalesFee", calcFee(capDtlMap.getLong("stlDiffAgencyFee"), capDtlMap.getDouble("stlDiffSalesRate")));
+
 				// 에이전시 차액정산 최종 수수료 : 에이전시 차액정산 수수료 - 지사 차액정산 수수료
-				capDtlMap.put("stlDiffAgencyFee", capDtlMap.getLong("stlDiffAgencyFee")-capDtlMap.getLong("stlDiffSalesFee"));
-				
+				capDtlMap.put("stlDiffAgencyFee", capDtlMap.getLong("stlDiffAgencyFee") - capDtlMap.getLong("stlDiffSalesFee"));
+
 				// 영중소 가맹점일 경우 대행사, 에이전시, 지사 일반 수수료는 0으로 한다.
 				capDtlMap.put("stlDistFee", 0);
 				capDtlMap.put("stlDistRate", 0);
@@ -568,85 +579,146 @@ public class Capture {
 				capDtlMap.put("stlAgencyRate", 0);
 				capDtlMap.put("stlSalesFee", 0);
 				capDtlMap.put("stlSalesRate", 0);
-				
-				
-				capDtlMap.put("stlDiffRate"	, diffRate);
-				capDtlMap.put("stlDiffAmt"	, calcFeeVat(trxCapMap.getLong("amount"),diffRate));
+
+
+				capDtlMap.put("stlDiffRate", diffRate);
+				capDtlMap.put("stlDiffAmt", calcFeeVat(trxCapMap.getLong("amount"), diffRate));
 				capDtlMap.put("stlDiffStatus", "결과대기");
-				long benefit1 = capDtlMap.getLong("stlFee")+capDtlMap.getLong("stlFeeVat")-capDtlMap.getLong("stlDistFee")-capDtlMap.getLong("stlAgencyFee")-capDtlMap.getLong("stlSalesFee")-capDtlMap.getLong("stlVanFee");
+				long benefit1 = capDtlMap.getLong("stlFee") + capDtlMap.getLong("stlFeeVat") - capDtlMap.getLong("stlDistFee") - capDtlMap.getLong("stlAgencyFee") - capDtlMap.getLong("stlSalesFee") - capDtlMap.getLong("stlVanFee");
 				long benefit2 = capDtlMap.getLong("stlDiffAmt") - (stlDiffDistFee + stlDiffAgencyFee);
-				capDtlMap.put("benefit"		,  benefit1 + benefit2);
+				capDtlMap.put("benefit", benefit1 + benefit2);
 			} else {
-				capDtlMap.put("benefit"		, capDtlMap.getLong("stlFee")+capDtlMap.getLong("stlFeeVat")-capDtlMap.getLong("stlDistFee")-capDtlMap.getLong("stlAgencyFee")-capDtlMap.getLong("stlSalesFee")-capDtlMap.getLong("stlVanFee"));
+				capDtlMap.put("benefit", capDtlMap.getLong("stlFee") + capDtlMap.getLong("stlFeeVat") - capDtlMap.getLong("stlDistFee") - capDtlMap.getLong("stlAgencyFee") - capDtlMap.getLong("stlSalesFee") - capDtlMap.getLong("stlVanFee"));
 			}
-			capDtlMap.put("stlDiffType"	, mchtMngMap.getString("diffType"));
-			capDtlMap.put("stlVanDay"	, calcDay(orgFeeMap.getString("settleType"),trxCapMap.getString("trxDay")));
+			capDtlMap.put("stlDiffType", mchtMngMap.getString("diffType"));
+			capDtlMap.put("stlVanDay", calcDay(orgFeeMap.getString("settleType"), trxCapMap.getString("trxDay")));
 		}
-		capDtlMap.put("taxId"		, mchtTmnMap.getString("taxId"));
-		
+		capDtlMap.put("taxId", mchtTmnMap.getString("taxId"));
+
 		insertCapDtlList.add(capDtlMap);
-		
-		if(mchtMap.getString("aggregator").equals("Y")){
-			SharedMap<String,Object> capSubMap = new SharedMap<String,Object>();
-			SharedMap<String,Object> tmnDtlMap = trxDAO.getMchtTmnDtlByTmnId(trxCapMap.getString("tmnId"));
-			capSubMap.put("capId"	, trxCapMap.getString("capId"));
-			capSubMap.put("trxId"	, trxCapMap.getString("trxId"));
-			capSubMap.put("mchtId"	, trxCapMap.getString("mchtId"));
-			capSubMap.put("tmnId"	, trxCapMap.getString("tmnId"));
-			capSubMap.put("capType" , trxCapMap.getString("capType"));
-			capSubMap.put("rfdType"	, trxCapMap.getString("rfdType"));
+
+		if (mchtMap.getString("aggregator").equals("Y")) {
+			SharedMap<String, Object> capSubMap = new SharedMap<String, Object>();
+			SharedMap<String, Object> tmnDtlMap = trxDAO.getMchtTmnDtlByTmnId(trxCapMap.getString("tmnId"));
+			capSubMap.put("capId", trxCapMap.getString("capId"));
+			capSubMap.put("trxId", trxCapMap.getString("trxId"));
+			capSubMap.put("mchtId", trxCapMap.getString("mchtId"));
+			capSubMap.put("tmnId", trxCapMap.getString("tmnId"));
+			capSubMap.put("capType", trxCapMap.getString("capType"));
+			capSubMap.put("rfdType", trxCapMap.getString("rfdType"));
 			capSubMap.put("rootTrxId", trxCapMap.getString("rootTrxId"));
-			capSubMap.put("amount"	, trxCapMap.getLong("amount"));
-			capSubMap.put("stlRate"	, tmnDtlMap.getDouble("rate")*1.1);
-			capSubMap.put("stlFee"	, calcFee(trxCapMap.getLong("amount"),tmnDtlMap.getDouble("rate")));
+			capSubMap.put("amount", trxCapMap.getLong("amount"));
+			capSubMap.put("stlRate", tmnDtlMap.getDouble("rate") * 1.1);
+			capSubMap.put("stlFee", calcFee(trxCapMap.getLong("amount"), tmnDtlMap.getDouble("rate")));
 			capSubMap.put("stlFeeVat", calcVat(capSubMap.getLong("stlFee")));
-			capSubMap.put("stlAmount", capSubMap.getLong("amount")-capSubMap.getLong("stlFee")-capSubMap.getLong("stlFeeVat"));
-			capSubMap.put("stlType"	, "D+1");
-			capSubMap.put("stlDay"	, calcDay(capSubMap.getString("stlType"),trxCapMap.getString("trxDay")));
-			capSubMap.put("stlId"	, "");
-			capSubMap.put("benefit"	, capDtlMap.getLong("stlAmount")-capSubMap.getLong("stlAmount"));
+			capSubMap.put("stlAmount", capSubMap.getLong("amount") - capSubMap.getLong("stlFee") - capSubMap.getLong("stlFeeVat"));
+			capSubMap.put("stlType", "D+1");
+			capSubMap.put("stlDay", calcDay(capSubMap.getString("stlType"), trxCapMap.getString("trxDay")));
+			capSubMap.put("stlId", "");
+			capSubMap.put("benefit", capDtlMap.getLong("stlAmount") - capSubMap.getLong("stlAmount"));
 			capSubMap.put("trxDay", trxCapMap.getString("trxDay"));
 			capSubMap.put("regDay", trxCapMap.getString("regDay"));
 			capSubMap.put("regTime", trxCapMap.getString("regTime"));
-			capSubMap.put("regDate"	, CommonUtil.getCurrentTimestamp());
+			capSubMap.put("regDate", CommonUtil.getCurrentTimestamp());
 			insertCapSubList.add(capSubMap);
 		}
-		
+
+		if (isRentApp && mchtRentMap.isEquals("settleType", "C+0")) {
+			if((!"월세 최초결제".equals(capDtlMap.getString("risk")) && !"월세 1회한도".equals(capDtlMap.getString("risk")))
+					&& !"월세 월한도".equals(capDtlMap.getString("risk"))) {
+
+				logger.info("===================================================");
+				logger.info("PG_CHARGE_SETTLE 테이블 승인 INSERT");
+
+				SharedMap<String,Object> chargeSettlebMap = createChargeSettleMap(trxCapMap, capDtlMap);
+				insertChargeSettleList.add(chargeSettlebMap);
+
+				logger.info("===================================================");
+
+				// 예약이체 insert
+				if(!"분납".equals(trxRentMap.getString("billingMethod"))) {
+					SharedMap<String, Object> mchtTaxMap = trxDAO.getMchtTaxByTaxId(mchtTmnMap.getString("taxId"));
+					SharedMap<String,Object> chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, capDtlMap, trxRentMap, mchtTaxMap);
+					insertChargeSettleFirmList.add(chargeSettleFirmMap);
+				}
+			}
 		//정상결제 완료 건인데 충전정산 실시간 전송 가맹점의 거래건일 경우 가맹점 충전정산 거래내역 테이블 저장
-		if(mchtMngMap.isEquals("settleType", "C+0")) {
-			SharedMap<String,Object> chargeSettlebMap = new SharedMap<String,Object>();
-			String regDate = CommonUtil.getCurrentDate("yyyyMMddHHmmss");
-			
+		} else if(mchtMngMap.isEquals("settleType", "C+0")) {
 			logger.info("===================================================");
 			logger.info("PG_CHARGE_SETTLE 테이블 승인 INSERT");
-			chargeSettlebMap.put("trxId"	, trxCapMap.getString("trxId"));
-			chargeSettlebMap.put("mchtId"	, trxCapMap.getString("mchtId"));
-			chargeSettlebMap.put("trxType"	, "입금");
-			chargeSettlebMap.put("trxUnit"	, "신용카드정산");
-			chargeSettlebMap.put("trxDay"	, regDate.substring(0, 8));
-			chargeSettlebMap.put("trxTime"	, regDate.substring(8));
-			chargeSettlebMap.put("amount"	, Math.abs(trxCapMap.getLong("amount")));
-			chargeSettlebMap.put("fee"		, Math.abs(capDtlMap.getLong("stlFee")));
-			chargeSettlebMap.put("feeVat"	, Math.abs(capDtlMap.getLong("stlFeeVat")));
-			chargeSettlebMap.put("bankFee"	, 0);
-			chargeSettlebMap.put("netAmount", Math.abs(capDtlMap.getLong("stlAmount")));
-			chargeSettlebMap.put("balance"	, trxDAO.getMchtBalance(trxCapMap.getString("mchtId")).getLong("balance")+Math.abs(capDtlMap.getLong("stlAmount")));
-			chargeSettlebMap.put("trackId"	, trxCapMap.getString("trackId"));
-			chargeSettlebMap.put("refId"	, trxCapMap.getString("capId"));
-			chargeSettlebMap.put("bankCd"	, "");
-			chargeSettlebMap.put("bankName"	, "");
-			chargeSettlebMap.put("account"	, "");
-			chargeSettlebMap.put("holder"	, "");
-			chargeSettlebMap.put("recordInfo"	, "");
-			
-			String stlDay = capDtlMap.getString("stlDay").substring(0, 4)+"-"+capDtlMap.getString("stlDay").substring(4,6)+"-"+capDtlMap.getString("stlDay").substring(6);
-			chargeSettlebMap.put("summary"	, stlDay+"정산일자 실시간 신용카드 정산금 지급");
-			chargeSettlebMap.put("regId"	, trxCapMap.getString("mchtId"));
-			chargeSettlebMap.put("regDay"	, regDate.substring(0, 8));
 
+			SharedMap<String,Object> chargeSettlebMap = createChargeSettleMap(trxCapMap, capDtlMap);
 			insertChargeSettleList.add(chargeSettlebMap);
+
 			logger.info("===================================================");
-		} 
+		}
+	}
+
+	private SharedMap<String,Object> createChargeSettleMap(SharedMap<String,Object> trxCapMap, SharedMap<String,Object> capDtlMap) {
+		SharedMap<String,Object> chargeSettlebMap = new SharedMap<String,Object>();
+		String regDate = CommonUtil.getCurrentDate("yyyyMMddHHmmss");
+
+		chargeSettlebMap.put("trxId"	, trxCapMap.getString("trxId"));
+		chargeSettlebMap.put("mchtId"	, trxCapMap.getString("mchtId"));
+		chargeSettlebMap.put("trxType"	, "입금");
+		chargeSettlebMap.put("trxUnit"	, "신용카드정산");
+		chargeSettlebMap.put("trxDay"	, regDate.substring(0, 8));
+		chargeSettlebMap.put("trxTime"	, regDate.substring(8));
+		chargeSettlebMap.put("amount"	, Math.abs(trxCapMap.getLong("amount")));
+		chargeSettlebMap.put("fee"		, Math.abs(capDtlMap.getLong("stlFee")));
+		chargeSettlebMap.put("feeVat"	, Math.abs(capDtlMap.getLong("stlFeeVat")));
+		chargeSettlebMap.put("bankFee"	, 0);
+		chargeSettlebMap.put("netAmount", Math.abs(capDtlMap.getLong("stlAmount")));
+		chargeSettlebMap.put("balance"	, trxDAO.getMchtBalance(trxCapMap.getString("mchtId")).getLong("balance")+Math.abs(capDtlMap.getLong("stlAmount")));
+		chargeSettlebMap.put("trackId"	, trxCapMap.getString("trackId"));
+		chargeSettlebMap.put("refId"	, trxCapMap.getString("capId"));
+		chargeSettlebMap.put("bankCd"	, "");
+		chargeSettlebMap.put("bankName"	, "");
+		chargeSettlebMap.put("account"	, "");
+		chargeSettlebMap.put("holder"	, "");
+		chargeSettlebMap.put("recordInfo"	, "");
+
+		String stlDay = capDtlMap.getString("stlDay").substring(0, 4)+"-"+capDtlMap.getString("stlDay").substring(4,6)+"-"+capDtlMap.getString("stlDay").substring(6);
+		chargeSettlebMap.put("summary"	, stlDay+"정산일자 실시간 신용카드 정산금 지급");
+		chargeSettlebMap.put("regId"	, trxCapMap.getString("mchtId"));
+		chargeSettlebMap.put("regDay"	, regDate.substring(0, 8));
+
+		return chargeSettlebMap;
+	}
+
+	private SharedMap<String,Object> createChargeSettleFirmMap(SharedMap<String,Object> trxCapMap, SharedMap<String,Object> capDtlMap, SharedMap<String,Object> trxRentMap, SharedMap<String,Object> mchtTaxMap) {
+		SharedMap<String,Object> chargeSettlebFirmMap = new SharedMap<String,Object>();
+		String regDate = CommonUtil.getCurrentDate("yyyyMMddHHmmss");
+		String pubTime = "010000";
+
+		chargeSettlebFirmMap.put("trxId"	, trxCapMap.getString("trxId"));
+		chargeSettlebFirmMap.put("transferType"	, "예약");
+		chargeSettlebFirmMap.put("mchtId"	, trxCapMap.getString("mchtId"));
+		chargeSettlebFirmMap.put("trackId"	, trxCapMap.getString("trackId"));
+		chargeSettlebFirmMap.put("pubDay"	, trxRentMap.getString("transferDay"));
+		chargeSettlebFirmMap.put("pubTime"	, pubTime);
+		chargeSettlebFirmMap.put("status"	, "대기");
+		chargeSettlebFirmMap.put("retry"	, 0);
+		chargeSettlebFirmMap.put("trxDay"	, regDate.substring(0, 8));
+		chargeSettlebFirmMap.put("trxTime"	, regDate.substring(8));
+		chargeSettlebFirmMap.put("amount"	, Math.abs(trxCapMap.getLong("amount")));
+		chargeSettlebFirmMap.put("fee"		, Math.abs(capDtlMap.getLong("stlFee")));
+		chargeSettlebFirmMap.put("feeVat"	, Math.abs(capDtlMap.getLong("stlFeeVat")));
+		chargeSettlebFirmMap.put("bankFee"	, 0);
+		chargeSettlebFirmMap.put("netAmount", Math.abs(capDtlMap.getLong("stlAmount")));
+		chargeSettlebFirmMap.put("balance"	, trxDAO.getMchtBalance(trxCapMap.getString("mchtId")).getLong("balance")+Math.abs(capDtlMap.getLong("stlAmount")));
+		chargeSettlebFirmMap.put("resultCd"	, "");
+		chargeSettlebFirmMap.put("resultMsg"	, "");
+		chargeSettlebFirmMap.put("refId"	, trxCapMap.getString("capId"));
+		chargeSettlebFirmMap.put("account"	, mchtTaxMap.getString("account"));
+		chargeSettlebFirmMap.put("bankCd"	, mchtTaxMap.getString("bankCd"));
+		chargeSettlebFirmMap.put("bankName"	, mchtTaxMap.getString("bankName"));
+		chargeSettlebFirmMap.put("holder"	, mchtTaxMap.getString("accntHolder"));
+		chargeSettlebFirmMap.put("recordInfo"	, "");
+		chargeSettlebFirmMap.put("regId"	, trxCapMap.getString("mchtId"));
+		chargeSettlebFirmMap.put("regDay"	, regDate.substring(0, 8));
+
+		return chargeSettlebFirmMap;
 	}
 	
 	
@@ -665,7 +737,8 @@ public class Capture {
 		SharedMap<String,Object> orgFeeMap		= trxDAO.getOrgFee(trxRfdMap.getString("van"));
 		SharedMap<String,Object> mchtSvcMap 	= trxDAO.getRealTimeMchtSvc(trxRfdMap.getString("mchtId"));
 		SharedMap<String,Object> mchtMngMap		= trxDAO.getMchtMngByMchtId(trxRfdMap.getString("mchtId"));
-		
+
+
 		//정산대기 이면서 리스크가 있었던 거래는 다시 선지급 수수료를 청구한다.
 		if(rootCapMap.getString("stlStatus").equals("정산대기") && rootCapMap.getString("stlType").equals("D+1") && !rootCapMap.isNullOrSpace("risk")){
 			SharedMap<String,Object> updateMap	= new SharedMap<String,Object>();
@@ -724,6 +797,7 @@ public class Capture {
 		trxCapMap.put("acquirer"	, trxRfdMap.getString("acquirer"));
 		trxCapMap.put("authCd"		, trxRfdMap.getString("authCd"));
 		trxCapMap.put("trxDay"		, trxRfdMap.getString("regDay"));
+		trxCapMap.put("serviceType"	, trxRfdMap.getString("serviceType"));
 		trxCapMap.put("regDay"		, trxRfdMap.getString("regDay"));
 		trxCapMap.put("regTime"		, trxRfdMap.getString("regTime"));
 		trxCapMap.put("regDate"		, CommonUtil.getCurrentTimestamp());
@@ -859,7 +933,11 @@ public class Capture {
 		
 		capDtlMap.put("stlInterRate", rootCapMap.getDouble("stlInterRate"));
 		capDtlMap.put("stlVanInterRate", rootCapMap.getDouble("stlVanInterRate"));
-		
+
+		capDtlMap.put("transferDay", rootCapMap.getString("transferDay"));
+		capDtlMap.put("billingMethod", rootCapMap.getString("billingMethod"));
+		capDtlMap.put("billingType", rootCapMap.getString("billingType"));
+
 
 		
 		insertCapDtlList.add(capDtlMap);

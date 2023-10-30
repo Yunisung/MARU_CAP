@@ -180,6 +180,15 @@ public class TrxDAO extends DAO {
 		}
 	}
 
+	public SharedMap<String, Object> getMchtTaxByTaxId(String taxId) {
+		super.setTable("PG_MCHT_TAX");
+		super.setColumns("*");
+		super.addWhere("taxId", taxId, eq);
+		RecordSet rset = super.search();
+		super.initRecord();
+		return rset.getRowFirst();
+	}
+
 	public SharedMap<String, Object> getAgencyMngById(String agencyId) {
 		String key = "PG_MAM_AGENCY_MNG_" + agencyId;
 		if (Cache.map.containsKey(key)) {
