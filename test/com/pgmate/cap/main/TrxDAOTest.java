@@ -54,25 +54,26 @@ public class TrxDAOTest {
     @Test
     public void testRentStlAmount() {
         Capture capture = new Capture();
-        long val = capture.calcRentStlAmount(104961, 4.51);
+        long val = capture.calcRentStlAmount(104400, 0.04);
         logger.debug("result {}", val);
 
-        long val2 = capture.calcRentStlAmount(-104840, 4.40);
+        long val2 = capture.calcRentStlAmount(104840, 0.044);
         logger.debug("result {}", val2);
 
-        long val3 = capture.calcRentStlAmount(104400, 4);
+        long val3 = capture.calcRentStlAmount(209900, 0.045);
         logger.debug("result {}", val3);
 
-        long val4 = capture.calcRentStlAmount(-104400, 4);
+        // 0.04444 -> 0.048884
+        long val4 = capture.calcRentStlAmount(1048884, 0.04444);
         logger.debug("result {}", val4);
 
-        long val5 = capture.calcRentStlAmount(3132, 4);
+        // 0.0444 -> 0.04884
+        long val5 = capture.calcRentStlAmount(104884, 0.0444);
         logger.debug("result {}", val5);
 
-        // 4400 * 4.4 = 193.6 => 예외 케이스이며 4.4% 계산시 소수점이 나오면 안된다.
-        // 4400 * 5.5 = 242
-        //long val6 = capture.calcRentStlAmount(4400 + 193, 5);
-        long val6 = capture.calcRentStlAmount(4400 + 242, 5);
+        // 0.0444 -> 0.04884
+        long val6 = capture.calcRentStlAmount(200000 + 9768, 0.0444);
         logger.debug("result {}", val6);
+
     }
 }

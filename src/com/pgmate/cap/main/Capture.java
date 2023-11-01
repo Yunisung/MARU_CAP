@@ -68,7 +68,8 @@ public class Capture {
 		insertCapDtlList	= new ArrayList<SharedMap<String,Object>>();
 		insertCapSubList 	= new ArrayList<SharedMap<String,Object>>();
 		insertChargeSettleList = new ArrayList<SharedMap<String,Object>>();
-		
+		insertChargeSettleFirmList = new ArrayList<SharedMap<String,Object>>();
+
 		List<SharedMap<String,Object>> trxRfdList = trxDAO.getTrxRfd();
 		i=1;
 		size = trxRfdList.size();
@@ -281,7 +282,8 @@ public class Capture {
 
 		if (!capDtlMap.isNullOrSpace("risk")) {
 			logger.info("capId : {}, risk : {}", trxCapMap.getString("capId"), capDtlMap.getString("risk"));
-			String[] riskData = {trxCapMap.getString("capId"), trxCapMap.getString("capId") + ":RISK 설정 ,D+1 " + capDtlMap.getString("risk") + ",수수료:" + (capDtlMap.getLong("stlFee") + capDtlMap.getLong("stlFeeVat"))};
+			String settleType = isRentApp? "C+0" : "D+1";
+			String[] riskData = {trxCapMap.getString("capId"), trxCapMap.getString("capId") + ":RISK 설정 ," + settleType + " " + capDtlMap.getString("risk") + ",수수료:" + (capDtlMap.getLong("stlFee") + capDtlMap.getLong("stlFeeVat"))};
 			riskList.add(riskData);
 		}
 
@@ -346,7 +348,7 @@ public class Capture {
 
 				// 월세앱은 선지급 수수료 제외
 				String billingType = trxRentMap.getString("billingType");
-				String contractType = trxRentMap.getString("contractType");
+				String contractType = mchtRentMap.getString("contractType");
 				double rentRate = 0.0;
 				if ("월세".equals(billingType)) {
 					rentRate = mchtRentMap.getDouble("rentRate");
@@ -359,7 +361,7 @@ public class Capture {
 				if ("임차인".equals(contractType)) {
 					//임차일경우
 					// 정산금액 = 거래금액 * ((1000/ (1000 + 44))
-					long rentStlAmount = calcRentStlAmount(trxCapMap.getLong("amount"), capDtlMap.getLong("stlRate"));
+					long rentStlAmount = calcRentStlAmount(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlRate"));
 					capDtlMap.put("stlFee", calcFee(rentStlAmount, capDtlMap.getDouble("stlRate")));
 					capDtlMap.put("stlFeeVat", calcVat(capDtlMap.getLong("stlFee")));
 					capDtlMap.put("stlAmount", rentStlAmount);
@@ -687,38 +689,38 @@ public class Capture {
 	}
 
 	private SharedMap<String,Object> createChargeSettleFirmMap(SharedMap<String,Object> trxCapMap, SharedMap<String,Object> capDtlMap, SharedMap<String,Object> trxRentMap, SharedMap<String,Object> mchtTaxMap) {
-		SharedMap<String,Object> chargeSettlebFirmMap = new SharedMap<String,Object>();
+		SharedMap<String,Object> chargeSettleFirmMap = new SharedMap<String,Object>();
 		String regDate = CommonUtil.getCurrentDate("yyyyMMddHHmmss");
-		String pubTime = "010000";
+		String pubTime = "004000";
 
-		chargeSettlebFirmMap.put("trxId"	, trxCapMap.getString("trxId"));
-		chargeSettlebFirmMap.put("transferType"	, "예약");
-		chargeSettlebFirmMap.put("mchtId"	, trxCapMap.getString("mchtId"));
-		chargeSettlebFirmMap.put("trackId"	, trxCapMap.getString("trackId"));
-		chargeSettlebFirmMap.put("pubDay"	, trxRentMap.getString("transferDay"));
-		chargeSettlebFirmMap.put("pubTime"	, pubTime);
-		chargeSettlebFirmMap.put("status"	, "대기");
-		chargeSettlebFirmMap.put("retry"	, 0);
-		chargeSettlebFirmMap.put("trxDay"	, regDate.substring(0, 8));
-		chargeSettlebFirmMap.put("trxTime"	, regDate.substring(8));
-		chargeSettlebFirmMap.put("amount"	, Math.abs(trxCapMap.getLong("amount")));
-		chargeSettlebFirmMap.put("fee"		, Math.abs(capDtlMap.getLong("stlFee")));
-		chargeSettlebFirmMap.put("feeVat"	, Math.abs(capDtlMap.getLong("stlFeeVat")));
-		chargeSettlebFirmMap.put("bankFee"	, 0);
-		chargeSettlebFirmMap.put("netAmount", Math.abs(capDtlMap.getLong("stlAmount")));
-		chargeSettlebFirmMap.put("balance"	, trxDAO.getMchtBalance(trxCapMap.getString("mchtId")).getLong("balance")+Math.abs(capDtlMap.getLong("stlAmount")));
-		chargeSettlebFirmMap.put("resultCd"	, "");
-		chargeSettlebFirmMap.put("resultMsg"	, "");
-		chargeSettlebFirmMap.put("refId"	, trxCapMap.getString("capId"));
-		chargeSettlebFirmMap.put("account"	, mchtTaxMap.getString("account"));
-		chargeSettlebFirmMap.put("bankCd"	, mchtTaxMap.getString("bankCd"));
-		chargeSettlebFirmMap.put("bankName"	, mchtTaxMap.getString("bankName"));
-		chargeSettlebFirmMap.put("holder"	, mchtTaxMap.getString("accntHolder"));
-		chargeSettlebFirmMap.put("recordInfo"	, "");
-		chargeSettlebFirmMap.put("regId"	, trxCapMap.getString("mchtId"));
-		chargeSettlebFirmMap.put("regDay"	, regDate.substring(0, 8));
+		chargeSettleFirmMap.put("trxId"		, trxCapMap.getString("trxId"));
+		chargeSettleFirmMap.put("transferType"	, "예약");
+		chargeSettleFirmMap.put("mchtId"	, trxCapMap.getString("mchtId"));
+		chargeSettleFirmMap.put("trackId"	, trxCapMap.getString("trackId"));
+		chargeSettleFirmMap.put("pubDay"	, trxRentMap.getString("transferDay"));
+		chargeSettleFirmMap.put("pubTime"	, pubTime);
+		chargeSettleFirmMap.put("status"	, "대기");
+		chargeSettleFirmMap.put("retry"		, 0);
+		chargeSettleFirmMap.put("trxDay"	, regDate.substring(0, 8));
+		chargeSettleFirmMap.put("trxTime"	, regDate.substring(8));
+		chargeSettleFirmMap.put("amount"	, Math.abs(trxCapMap.getLong("amount")));
+		chargeSettleFirmMap.put("fee"		, Math.abs(capDtlMap.getLong("stlFee")));
+		chargeSettleFirmMap.put("feeVat"	, Math.abs(capDtlMap.getLong("stlFeeVat")));
+		chargeSettleFirmMap.put("bankFee"	, 0);
+		chargeSettleFirmMap.put("netAmount"	, Math.abs(capDtlMap.getLong("stlAmount")));
+		chargeSettleFirmMap.put("balance"	, trxDAO.getMchtBalance(trxCapMap.getString("mchtId")).getLong("balance")+Math.abs(capDtlMap.getLong("stlAmount")));
+		chargeSettleFirmMap.put("resultCd"	, "");
+		chargeSettleFirmMap.put("resultMsg"	, "");
+		chargeSettleFirmMap.put("refId"		, trxCapMap.getString("capId"));
+		chargeSettleFirmMap.put("account"	, mchtTaxMap.getString("account"));
+		chargeSettleFirmMap.put("bankCd"	, mchtTaxMap.getString("bankCd"));
+		chargeSettleFirmMap.put("bankName"	, mchtTaxMap.getString("bankName"));
+		chargeSettleFirmMap.put("holder"	, mchtTaxMap.getString("accntHolder"));
+		chargeSettleFirmMap.put("recordInfo", "");
+		chargeSettleFirmMap.put("regId"		, trxCapMap.getString("mchtId"));
+		chargeSettleFirmMap.put("regDay"	, regDate.substring(0, 8));
 
-		return chargeSettlebFirmMap;
+		return chargeSettleFirmMap;
 	}
 	
 	
@@ -1371,9 +1373,13 @@ public class Capture {
 	public long calcRentStlAmount(long amount,double rate){
 		//수수료 = 거래금액 * ((1000/ (1000 + 44))
 		double rateVat = (rate * 0.1);
-		rate = rateFormat(rate + rateVat);
-		long decimal = 100000;
-		double perRate = new Double(rate * 1000).longValue();
+
+		String pattern = "#.######";
+		DecimalFormat format = new DecimalFormat(pattern);
+		rate = new Double(format.format(rate + rateVat)).doubleValue();
+
+		long decimal = 10000 * 10000;
+		double perRate = new Double(rate * decimal).doubleValue();
 		double calRate = new Double(decimal / (decimal + perRate)).doubleValue();
 		return new Double(amount * calRate).longValue();
 	}
