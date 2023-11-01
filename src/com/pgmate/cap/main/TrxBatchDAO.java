@@ -314,7 +314,7 @@ public class TrxBatchDAO  {
 	public int insertChargeSettleFirm(List<SharedMap<String,Object>> insertChargeSettleFirmList){
 		int inserted = 0;
 		logger.debug("insert chargeSettle batch : {}",insertChargeSettleFirmList.size());
-		String query = "insert into PG_CHARGE_SETTLE_FIRM_RESERVE (trxId, transferType, mchtId, trackId, pubDay, pubTime, status, retry, trxDay, trxTime, amount, fee, feeVat, bankFee, netAmount, balance, resultCd, resultMsg, refId, account, bankCd, bankName, holder, recordInfo, regId, regDay)  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+		String query = "insert into PG_CHARGE_SETTLE_FIRM_RESERVE (trxId, transferType, mchtId, trackId, pubDay, pubTime, status, retry, trxDay, trxTime, amount, fee, feeVat, bankFee, netAmount, balance, resultCd, resultMsg, refId, account, bankCd, bankName, holder, recordInfo, regId, regDay)  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		DBManager db = null ;
 		Connection conn = null;

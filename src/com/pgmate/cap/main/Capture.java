@@ -161,7 +161,7 @@ public class Capture {
 		if (isRentApp) {
 			trxCapMap.put("serviceType", "월세앱");
 		} else {
-			trxCapMap.put("serviceType", "일반");
+			trxCapMap.put("serviceType", "");
 		}
 
 		trxCapMap.put("cardId", trxPayMap.getString("cardId"));
