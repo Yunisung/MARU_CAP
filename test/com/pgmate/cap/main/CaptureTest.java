@@ -82,5 +82,47 @@ public class CaptureTest {
         capture.capture(trxPayMap);
     }
 
+    @Test
+    public void refundRentAppPay() {
+        SharedMap<String,Object> trxRfdMap = new SharedMap();
+        String trxId = "T231025043414";
+        String trackId = "test-1698218723708";
+        String rootTtrxId = "T231025043413";
+        String rootTrackId = "test-1698218723707";
+
+        trxRfdMap.put("trxId", trxId);
+        trxRfdMap.put("mchtId", "bktest001");
+        trxRfdMap.put("tmnId", "TMN000029");
+        trxRfdMap.put("trackId", trackId);
+        trxRfdMap.put("status", "완료");
+        trxRfdMap.put("rfdType", "");
+        trxRfdMap.put("rfdAll", "전액");
+        trxRfdMap.put("rfdAmount", -1004);
+        trxRfdMap.put("rfdVat", -91);
+        trxRfdMap.put("cardId", "card_1867-c6622d-316-114c4");
+        trxRfdMap.put("bin", "944542");
+        trxRfdMap.put("last4", "404*");
+        trxRfdMap.put("issuer", "국민");
+        trxRfdMap.put("acquirer", "국민");
+        trxRfdMap.put("rootTrnDay", "20231030");
+        trxRfdMap.put("rootTrxId", rootTtrxId);
+        trxRfdMap.put("rootTrackId", rootTrackId);
+        trxRfdMap.put("rootAmount", 1004);
+        trxRfdMap.put("rootVat", 91);
+        trxRfdMap.put("reqDay", "20231030");
+        trxRfdMap.put("reqTime", "162525");
+        trxRfdMap.put("authCd", "30039247");
+        trxRfdMap.put("resultCd", "0000");
+        trxRfdMap.put("resultMsg", "성공");
+        trxRfdMap.put("van", "GALAXIA온라인");
+        trxRfdMap.put("vanId", "M2245531");
+        trxRfdMap.put("vanTrxId", "2023102516C2067906");
+        trxRfdMap.put("vanResultCd", "정상");
+        trxRfdMap.put("regDay", "20231031");
+        trxRfdMap.put("regTime", "162541");
+
+        capture.refund(trxRfdMap);
+    }
+
 
 }

@@ -632,8 +632,8 @@ public class Capture {
 				logger.info("===================================================");
 				logger.info("PG_CHARGE_SETTLE 테이블 승인 INSERT");
 
-				SharedMap<String,Object> chargeSettlebMap = createChargeSettleMap(trxCapMap, capDtlMap);
-				insertChargeSettleList.add(chargeSettlebMap);
+				SharedMap<String,Object> chargeSettleMap = createChargeSettleMap(trxCapMap, capDtlMap);
+				insertChargeSettleList.add(chargeSettleMap);
 
 				logger.info("===================================================");
 
@@ -649,43 +649,43 @@ public class Capture {
 			logger.info("===================================================");
 			logger.info("PG_CHARGE_SETTLE 테이블 승인 INSERT");
 
-			SharedMap<String,Object> chargeSettlebMap = createChargeSettleMap(trxCapMap, capDtlMap);
-			insertChargeSettleList.add(chargeSettlebMap);
+			SharedMap<String,Object> chargeSettleMap = createChargeSettleMap(trxCapMap, capDtlMap);
+			insertChargeSettleList.add(chargeSettleMap);
 
 			logger.info("===================================================");
 		}
 	}
 
 	private SharedMap<String,Object> createChargeSettleMap(SharedMap<String,Object> trxCapMap, SharedMap<String,Object> capDtlMap) {
-		SharedMap<String,Object> chargeSettlebMap = new SharedMap<String,Object>();
+		SharedMap<String,Object> chargeSettleMap = new SharedMap<String,Object>();
 		String regDate = CommonUtil.getCurrentDate("yyyyMMddHHmmss");
 
-		chargeSettlebMap.put("trxId"	, trxCapMap.getString("trxId"));
-		chargeSettlebMap.put("mchtId"	, trxCapMap.getString("mchtId"));
-		chargeSettlebMap.put("trxType"	, "입금");
-		chargeSettlebMap.put("trxUnit"	, "신용카드정산");
-		chargeSettlebMap.put("trxDay"	, regDate.substring(0, 8));
-		chargeSettlebMap.put("trxTime"	, regDate.substring(8));
-		chargeSettlebMap.put("amount"	, Math.abs(trxCapMap.getLong("amount")));
-		chargeSettlebMap.put("fee"		, Math.abs(capDtlMap.getLong("stlFee")));
-		chargeSettlebMap.put("feeVat"	, Math.abs(capDtlMap.getLong("stlFeeVat")));
-		chargeSettlebMap.put("bankFee"	, 0);
-		chargeSettlebMap.put("netAmount", Math.abs(capDtlMap.getLong("stlAmount")));
-		chargeSettlebMap.put("balance"	, trxDAO.getMchtBalance(trxCapMap.getString("mchtId")).getLong("balance")+Math.abs(capDtlMap.getLong("stlAmount")));
-		chargeSettlebMap.put("trackId"	, trxCapMap.getString("trackId"));
-		chargeSettlebMap.put("refId"	, trxCapMap.getString("capId"));
-		chargeSettlebMap.put("bankCd"	, "");
-		chargeSettlebMap.put("bankName"	, "");
-		chargeSettlebMap.put("account"	, "");
-		chargeSettlebMap.put("holder"	, "");
-		chargeSettlebMap.put("recordInfo"	, "");
+		chargeSettleMap.put("trxId"	, trxCapMap.getString("trxId"));
+		chargeSettleMap.put("mchtId"	, trxCapMap.getString("mchtId"));
+		chargeSettleMap.put("trxType"	, "입금");
+		chargeSettleMap.put("trxUnit"	, "신용카드정산");
+		chargeSettleMap.put("trxDay"	, regDate.substring(0, 8));
+		chargeSettleMap.put("trxTime"	, regDate.substring(8));
+		chargeSettleMap.put("amount"	, Math.abs(trxCapMap.getLong("amount")));
+		chargeSettleMap.put("fee"		, Math.abs(capDtlMap.getLong("stlFee")));
+		chargeSettleMap.put("feeVat"	, Math.abs(capDtlMap.getLong("stlFeeVat")));
+		chargeSettleMap.put("bankFee"	, 0);
+		chargeSettleMap.put("netAmount", Math.abs(capDtlMap.getLong("stlAmount")));
+		chargeSettleMap.put("balance"	, trxDAO.getMchtBalance(trxCapMap.getString("mchtId")).getLong("balance")+Math.abs(capDtlMap.getLong("stlAmount")));
+		chargeSettleMap.put("trackId"	, trxCapMap.getString("trackId"));
+		chargeSettleMap.put("refId"	, trxCapMap.getString("capId"));
+		chargeSettleMap.put("bankCd"	, "");
+		chargeSettleMap.put("bankName"	, "");
+		chargeSettleMap.put("account"	, "");
+		chargeSettleMap.put("holder"	, "");
+		chargeSettleMap.put("recordInfo"	, "");
 
 		String stlDay = capDtlMap.getString("stlDay").substring(0, 4)+"-"+capDtlMap.getString("stlDay").substring(4,6)+"-"+capDtlMap.getString("stlDay").substring(6);
-		chargeSettlebMap.put("summary"	, stlDay+"정산일자 실시간 신용카드 정산금 지급");
-		chargeSettlebMap.put("regId"	, trxCapMap.getString("mchtId"));
-		chargeSettlebMap.put("regDay"	, regDate.substring(0, 8));
+		chargeSettleMap.put("summary"	, stlDay+"정산일자 실시간 신용카드 정산금 지급");
+		chargeSettleMap.put("regId"	, trxCapMap.getString("mchtId"));
+		chargeSettleMap.put("regDay"	, regDate.substring(0, 8));
 
-		return chargeSettlebMap;
+		return chargeSettleMap;
 	}
 
 	private SharedMap<String,Object> createChargeSettleFirmMap(SharedMap<String,Object> trxCapMap, SharedMap<String,Object> capDtlMap, SharedMap<String,Object> trxRentMap, SharedMap<String,Object> mchtTaxMap) {
@@ -731,6 +731,7 @@ public class Capture {
 			//검색된 매입내역이 없으면 리턴한다.
 			return;
 		}
+
 		
 		SharedMap<String,Object> mchtMap		= trxDAO.getMchtByMchtId(trxRfdMap.getString("mchtId"));
 		SharedMap<String,Object> agencyMngMap	= trxDAO.getAgencyMngById(mchtMap.getString("agencyId"));
@@ -971,42 +972,49 @@ public class Capture {
 			capSubMap.put("regDate"	, CommonUtil.getCurrentTimestamp());
 			insertCapSubList.add(capSubMap);
 		}
-		
+
 		//정상결제 완료 건인데 충전정산 실시간 전송 가맹점의 거래건일 경우 가맹점 충전정산 거래내역 테이블 저장
 		if(rootCapMap.isEquals("stlType", "C+0")) {
-			SharedMap<String,Object> chargeSettlebMap = new SharedMap<String,Object>();
-			String regDate = CommonUtil.getCurrentDate("yyyyMMddHHmmss");
-
 			logger.info("===================================================");
 			logger.info("PG_CHARGE_SETTLE 테이블 취소 INSERT");
-			chargeSettlebMap.put("trxId"	, trxRfdMap.getString("trxId"));
-			chargeSettlebMap.put("mchtId"	, rootCapMap.getString("mchtId"));
-			chargeSettlebMap.put("trxType"	, "출금");
-			chargeSettlebMap.put("trxUnit"	, "신용카드정산");
-			chargeSettlebMap.put("trxDay"	, regDate.substring(0, 8));
-			chargeSettlebMap.put("trxTime"	, regDate.substring(8));
-			chargeSettlebMap.put("amount"	, Math.abs(rootCapMap.getLong("amount")));
-			chargeSettlebMap.put("fee"		, Math.abs(rootCapMap.getLong("stlFee")));
-			chargeSettlebMap.put("feeVat"	, Math.abs(rootCapMap.getLong("stlFeeVat")));
-			chargeSettlebMap.put("bankFee"	, 0);
-			chargeSettlebMap.put("netAmount", Math.abs(rootCapMap.getLong("stlAmount")));
-			chargeSettlebMap.put("balance"	, trxDAO.getMchtBalance(rootCapMap.getString("mchtId")).getLong("balance")-Math.abs(rootCapMap.getLong("stlAmount")));
-			chargeSettlebMap.put("trackId"	, trxCapMap.getString("trackId"));
-			chargeSettlebMap.put("refId"	, trxCapMap.getString("capId"));
-			chargeSettlebMap.put("bankCd"	, "");
-			chargeSettlebMap.put("bankName"	, "");
-			chargeSettlebMap.put("account"	, "");
-			chargeSettlebMap.put("holder"	, "");
-			chargeSettlebMap.put("recordInfo"	, "");
-			
-			String stlDay = capDtlMap.getString("stlDay").substring(0, 4)+"-"+capDtlMap.getString("stlDay").substring(4,6)+"-"+capDtlMap.getString("stlDay").substring(6);
-			chargeSettlebMap.put("summary"	, stlDay+"정산일자 실시간 신용카드 정산금 지급");
-			chargeSettlebMap.put("regId"	, trxCapMap.getString("mchtId"));
-			chargeSettlebMap.put("regDay"	, regDate.substring(0, 8));
 
-			insertChargeSettleList.add(chargeSettlebMap);
+			SharedMap<String,Object> chargeSettleMap = createRefundChargeSettleMap(trxCapMap, capDtlMap, trxRfdMap, rootCapMap);
+			insertChargeSettleList.add(chargeSettleMap);
+
 			logger.info("===================================================");
 		} 
+	}
+
+	private SharedMap<String,Object> createRefundChargeSettleMap(SharedMap<String,Object> trxCapMap, SharedMap<String,Object> capDtlMap, SharedMap<String,Object> trxRfdMap, SharedMap<String,Object> rootCapMap) {
+		SharedMap<String,Object> chargeSettleMap = new SharedMap<String,Object>();
+		String regDate = CommonUtil.getCurrentDate("yyyyMMddHHmmss");
+
+		chargeSettleMap.put("trxId"	, trxRfdMap.getString("trxId"));
+		chargeSettleMap.put("mchtId"	, rootCapMap.getString("mchtId"));
+		chargeSettleMap.put("trxType"	, "출금");
+		chargeSettleMap.put("trxUnit"	, "신용카드정산");
+		chargeSettleMap.put("trxDay"	, regDate.substring(0, 8));
+		chargeSettleMap.put("trxTime"	, regDate.substring(8));
+		chargeSettleMap.put("amount"	, Math.abs(rootCapMap.getLong("amount")));
+		chargeSettleMap.put("fee"		, Math.abs(rootCapMap.getLong("stlFee")));
+		chargeSettleMap.put("feeVat"	, Math.abs(rootCapMap.getLong("stlFeeVat")));
+		chargeSettleMap.put("bankFee"	, 0);
+		chargeSettleMap.put("netAmount", Math.abs(rootCapMap.getLong("stlAmount")));
+		chargeSettleMap.put("balance"	, trxDAO.getMchtBalance(rootCapMap.getString("mchtId")).getLong("balance")-Math.abs(rootCapMap.getLong("stlAmount")));
+		chargeSettleMap.put("trackId"	, trxCapMap.getString("trackId"));
+		chargeSettleMap.put("refId"	, trxCapMap.getString("capId"));
+		chargeSettleMap.put("bankCd"	, "");
+		chargeSettleMap.put("bankName"	, "");
+		chargeSettleMap.put("account"	, "");
+		chargeSettleMap.put("holder"	, "");
+		chargeSettleMap.put("recordInfo"	, "");
+
+		String stlDay = capDtlMap.getString("stlDay").substring(0, 4)+"-"+capDtlMap.getString("stlDay").substring(4,6)+"-"+capDtlMap.getString("stlDay").substring(6);
+		chargeSettleMap.put("summary"	, stlDay+"정산일자 실시간 신용카드 정산금 지급");
+		chargeSettleMap.put("regId"	, trxCapMap.getString("mchtId"));
+		chargeSettleMap.put("regDay"	, regDate.substring(0, 8));
+
+		return chargeSettleMap;
 	}
 	
 	
