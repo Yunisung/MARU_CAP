@@ -712,6 +712,7 @@ public class Capture {
 		chargeSettleFirmMap.put("resultCd"	, "");
 		chargeSettleFirmMap.put("resultMsg"	, "");
 		chargeSettleFirmMap.put("refId"		, trxCapMap.getString("capId"));
+		chargeSettleFirmMap.put("rootTrxId"	, "");
 		chargeSettleFirmMap.put("account"	, mchtTaxMap.getString("account"));
 		chargeSettleFirmMap.put("bankCd"	, mchtTaxMap.getString("bankCd"));
 		chargeSettleFirmMap.put("bankName"	, mchtTaxMap.getString("bankName"));
