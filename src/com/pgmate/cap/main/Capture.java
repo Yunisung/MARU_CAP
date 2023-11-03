@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import com.pgmate.cap.hook.RiskChangeHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -626,8 +627,7 @@ public class Capture {
 		}
 
 		if (isRentApp && mchtRentMap.isEquals("settleType", "C+0")) {
-			if((!"월세 최초결제".equals(capDtlMap.getString("risk")) && !"월세 1회한도".equals(capDtlMap.getString("risk")))
-					&& !"월세 월한도".equals(capDtlMap.getString("risk"))) {
+			if(!"".equals(capDtlMap.getString("risk"))) {
 
 				logger.info("===================================================");
 				logger.info("PG_CHARGE_SETTLE 테이블 승인 INSERT");
@@ -639,9 +639,24 @@ public class Capture {
 
 				// 예약이체 insert
 				if(!"분납".equals(trxRentMap.getString("billingMethod"))) {
+					logger.info("===================================================");
+					logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 테이블 INSERT");
+
 					SharedMap<String, Object> mchtTaxMap = trxDAO.getMchtTaxByTaxId(mchtTmnMap.getString("taxId"));
 					SharedMap<String,Object> chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, capDtlMap, trxRentMap, mchtTaxMap);
 					insertChargeSettleFirmList.add(chargeSettleFirmMap);
+
+					logger.info("===================================================");
+				}
+			} else {
+				// risk가 존재한다면
+				// Noti Hook 실행
+				String hookAddr = mchtRentMap.getString("riskChangeNotiAddr");
+				if (!CommonUtil.isNullOrSpace(hookAddr)) {
+					SharedMap<String,Object> ntsMap = createNtsMap(trxCapMap, capDtlMap);
+					String payLoad = setPayLoad(ntsMap, "완료", "0000", "정상처리");
+					ntsMap.put("payLoad", payLoad);
+					new RiskChangeHook(hookAddr, ntsMap, "0").start();
 				}
 			}
 		//정상결제 완료 건인데 충전정산 실시간 전송 가맹점의 거래건일 경우 가맹점 충전정산 거래내역 테이블 저장
@@ -654,6 +669,38 @@ public class Capture {
 
 			logger.info("===================================================");
 		}
+	}
+
+	private SharedMap<String,Object> createNtsMap(SharedMap<String,Object> trxCapMap, SharedMap<String,Object> capDtlMap) {
+		SharedMap<String,Object> ntsMap = new SharedMap<String,Object>();
+		ntsMap.put("mchtId", trxCapMap.getString("mchtId"));
+		ntsMap.put("capId", trxCapMap.getString("capId"));
+		ntsMap.put("capType", trxCapMap.getString("capType"));
+		ntsMap.put("amount", trxCapMap.getString("amount"));
+		ntsMap.put("authCd", trxCapMap.getString("authCd"));
+		ntsMap.put("risk", capDtlMap.getString("risk"));
+		ntsMap.put("trxDay", trxCapMap.getString("trxDay"));
+		ntsMap.put("trackId", trxCapMap.getString("trackId"));
+		return ntsMap;
+	}
+
+	private String setPayLoad(SharedMap<String, Object> sharedMap, String status, String resultCd, String resultMsg){
+		SharedMap<String, String> payLoadMap = new SharedMap<String, String>();
+
+		payLoadMap.put("mchtId",sharedMap.getString("mchtId"));
+		payLoadMap.put("capId",sharedMap.getString("capId"));
+		payLoadMap.put("capType", sharedMap.getString("capType"));
+		payLoadMap.put("amount",sharedMap.getString("amount"));
+		payLoadMap.put("authCd", sharedMap.getString("authCd"));
+		payLoadMap.put("risk", sharedMap.getString("risk"));
+		payLoadMap.put("trxDay",CommonUtil.getCurrentDate("yyyyMMdd"));
+		payLoadMap.put("trxTime",CommonUtil.getCurrentDate("HHmmss"));
+		payLoadMap.put("status",status);
+		payLoadMap.put("trackId",sharedMap.getString("trackId"));
+		payLoadMap.put("resultCd",resultCd);
+		payLoadMap.put("resultMsg",resultMsg);
+		String payLoad = CommonUtil.toQueryString(payLoadMap,"UTF-8");
+		return payLoad;
 	}
 
 	private SharedMap<String,Object> createChargeSettleMap(SharedMap<String,Object> trxCapMap, SharedMap<String,Object> capDtlMap) {
@@ -713,10 +760,10 @@ public class Capture {
 		chargeSettleFirmMap.put("resultMsg"	, "");
 		chargeSettleFirmMap.put("refId"		, trxCapMap.getString("capId"));
 		chargeSettleFirmMap.put("rootTrxId"	, "");
-		chargeSettleFirmMap.put("account"	, mchtTaxMap.getString("account"));
+		chargeSettleFirmMap.put("account"	, trxDAO.getAESEnc(mchtTaxMap.getString("account")));
 		chargeSettleFirmMap.put("bankCd"	, mchtTaxMap.getString("bankCd"));
 		chargeSettleFirmMap.put("bankName"	, mchtTaxMap.getString("bankName"));
-		chargeSettleFirmMap.put("holder"	, mchtTaxMap.getString("accntHolder"));
+		chargeSettleFirmMap.put("holder"	, trxDAO.getAESEnc(mchtTaxMap.getString("accntHolder")));
 		chargeSettleFirmMap.put("recordInfo", "");
 		chargeSettleFirmMap.put("regId"		, trxCapMap.getString("mchtId"));
 		chargeSettleFirmMap.put("regDay"	, regDate.substring(0, 8));
@@ -983,6 +1030,12 @@ public class Capture {
 			insertChargeSettleList.add(chargeSettleMap);
 
 			logger.info("===================================================");
+
+			// 월세앱 거래건이라면 예약이체 대기 건 삭제
+			if("월세앱".equals(rootCapMap.getString("serviceType"))) {
+				trxDAO.deleteChargeSettleFirm(rootCapMap.getString("trxId"));
+			}
+
 		} 
 	}
 

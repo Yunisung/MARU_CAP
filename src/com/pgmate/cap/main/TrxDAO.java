@@ -1259,4 +1259,59 @@ public class TrxDAO extends DAO {
 		super.initRecord();
 		return rset.getRowFirst().getLong("totAmount");
 	}
+
+	public boolean insertRiskChangeNoti(SharedMap<String,Object> ntsMap) {
+		int result = 0;
+		String query = "INSERT INTO `PG_RISK_CHANGE_NOTI` (`mchtId`, `capId`, `trackId`, `risk`, `trxDay`, `hookAddr`, `retry`, `status`, `code`, `payLoad`, `resData`, `sentDate`, `regDay`, `regTime`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+		DBManager db 	= null;
+		PreparedStatement pstmt	= null;
+		Connection conn			= null;
+		ResultSet rset			= null;
+		int i = 1;
+		try{
+			db 		= DBFactory.getInstance();
+			conn	= db.getConnection();
+			pstmt	= conn.prepareStatement(query);
+			pstmt.setString(i++,ntsMap.getString("mchtId"));
+			pstmt.setString(i++,ntsMap.getString("capId"));
+			pstmt.setString(i++,ntsMap.getString("trackId"));
+			pstmt.setString(i++,ntsMap.getString("risk"));
+			pstmt.setString(i++,ntsMap.getString("trxDay"));
+			pstmt.setString(i++,ntsMap.getString("hookAddr"));
+			pstmt.setInt(i++,ntsMap.getInt("retry"));
+			pstmt.setString(i++,ntsMap.getString("status"));
+			pstmt.setInt(i++,ntsMap.getInt("code"));
+			pstmt.setString(i++,ntsMap.getString("payLoad"));
+			pstmt.setString(i++,ntsMap.getString("resData"));
+			pstmt.setTimestamp(i++,ntsMap.getTimestamp("sentDate"));
+			pstmt.setString(i++,ntsMap.getString("regDay"));
+			pstmt.setString(i++,ntsMap.getString("regTime"));
+
+			result = pstmt.executeUpdate();
+			conn.commit();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("insertRiskChangeNoti ERROR : {}, query : {}", e.getMessage(), query);
+		}finally{
+			db.close(conn,pstmt,rset);
+		}
+
+		if(result > 0) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+
+	public boolean deleteChargeSettleFirm(String trxId) {
+		super.setTable("PG_CHARGE_SETTLE_FIRM_RESERVE");
+		super.addWhere("trxId", trxId);
+		super.addWhere("status", "지급완료", ne);
+
+		boolean deleted = super.delete();
+		super.initRecord();
+		logger.info("set PG_CHARGE_SETTLE_FIRM_RESERVE delete : [{}][{}]", trxId, deleted);
+
+		return deleted;
+	}
 }
