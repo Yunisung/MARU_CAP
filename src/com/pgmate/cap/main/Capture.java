@@ -627,7 +627,7 @@ public class Capture {
 		}
 
 		if (isRentApp && mchtRentMap.isEquals("settleType", "C+0")) {
-			if(!"".equals(capDtlMap.getString("risk"))) {
+			if(CommonUtil.isNullOrSpace(capDtlMap.getString("risk"))) {
 
 				logger.info("===================================================");
 				logger.info("PG_CHARGE_SETTLE 테이블 승인 INSERT");
