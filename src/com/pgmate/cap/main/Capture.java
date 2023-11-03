@@ -626,7 +626,7 @@ public class Capture {
 			insertCapSubList.add(capSubMap);
 		}
 
-		if (isRentApp && mchtRentMap.isEquals("settleType", "C+0")) {
+		if(isRentApp && mchtRentMap.isEquals("settleType", "C+0")) {
 			if(CommonUtil.isNullOrSpace(capDtlMap.getString("risk"))) {
 
 				logger.info("===================================================");
@@ -643,7 +643,7 @@ public class Capture {
 					logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 테이블 INSERT");
 
 					SharedMap<String, Object> mchtTaxMap = trxDAO.getMchtTaxByTaxId(mchtTmnMap.getString("taxId"));
-					SharedMap<String,Object> chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, capDtlMap, trxRentMap, mchtTaxMap);
+					SharedMap<String,Object> chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, capDtlMap, trxRentMap, mchtRentMap, mchtTaxMap);
 					insertChargeSettleFirmList.add(chargeSettleFirmMap);
 
 					logger.info("===================================================");
@@ -735,7 +735,8 @@ public class Capture {
 		return chargeSettleMap;
 	}
 
-	private SharedMap<String,Object> createChargeSettleFirmMap(SharedMap<String,Object> trxCapMap, SharedMap<String,Object> capDtlMap, SharedMap<String,Object> trxRentMap, SharedMap<String,Object> mchtTaxMap) {
+	private SharedMap<String,Object> createChargeSettleFirmMap(SharedMap<String,Object> trxCapMap, SharedMap<String,Object> capDtlMap,
+															   SharedMap<String,Object> trxRentMap, SharedMap<String,Object> mchtRentMap, SharedMap<String,Object> mchtTaxMap) {
 		SharedMap<String,Object> chargeSettleFirmMap = new SharedMap<String,Object>();
 		String regDate = CommonUtil.getCurrentDate("yyyyMMddHHmmss");
 		String pubTime = "004000";
@@ -764,7 +765,7 @@ public class Capture {
 		chargeSettleFirmMap.put("bankCd"	, mchtTaxMap.getString("bankCd"));
 		chargeSettleFirmMap.put("bankName"	, mchtTaxMap.getString("bankName"));
 		chargeSettleFirmMap.put("holder"	, trxDAO.getAESEnc(mchtTaxMap.getString("accntHolder")));
-		chargeSettleFirmMap.put("recordInfo", "");
+		chargeSettleFirmMap.put("recordInfo", mchtRentMap.getString("sender"));
 		chargeSettleFirmMap.put("regId"		, trxCapMap.getString("mchtId"));
 		chargeSettleFirmMap.put("regDay"	, regDate.substring(0, 8));
 
@@ -788,6 +789,9 @@ public class Capture {
 		SharedMap<String,Object> orgFeeMap		= trxDAO.getOrgFee(trxRfdMap.getString("van"));
 		SharedMap<String,Object> mchtSvcMap 	= trxDAO.getRealTimeMchtSvc(trxRfdMap.getString("mchtId"));
 		SharedMap<String,Object> mchtMngMap		= trxDAO.getMchtMngByMchtId(trxRfdMap.getString("mchtId"));
+
+		// 서비스구분: 외부서비스(월세앱) 사용유무
+		boolean isRentApp = "월세앱".equals(rootCapMap.getString("serviceType"));
 
 
 		//정산대기 이면서 리스크가 있었던 거래는 다시 선지급 수수료를 청구한다.
@@ -1021,8 +1025,22 @@ public class Capture {
 			insertCapSubList.add(capSubMap);
 		}
 
+		if(isRentApp && rootCapMap.isEquals("stlType", "C+0")) {
+			logger.info("===================================================");
+			logger.info("PG_CHARGE_SETTLE 테이블 취소 INSERT");
+
+			SharedMap<String, Object> chargeSettleMap = createRefundChargeSettleMap(trxCapMap, capDtlMap, trxRfdMap, rootCapMap);
+			insertChargeSettleList.add(chargeSettleMap);
+
+			logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 테이블 DELETE");
+
+			// 월세앱 거래건이라면 예약이체 대기 건 삭제
+			trxDAO.deleteChargeSettleFirm(rootCapMap.getString("trxId"));
+
+			logger.info("===================================================");
+		}
 		//정상결제 완료 건인데 충전정산 실시간 전송 가맹점의 거래건일 경우 가맹점 충전정산 거래내역 테이블 저장
-		if(rootCapMap.isEquals("stlType", "C+0")) {
+		else if(rootCapMap.isEquals("stlType", "C+0")) {
 			logger.info("===================================================");
 			logger.info("PG_CHARGE_SETTLE 테이블 취소 INSERT");
 
@@ -1030,12 +1048,6 @@ public class Capture {
 			insertChargeSettleList.add(chargeSettleMap);
 
 			logger.info("===================================================");
-
-			// 월세앱 거래건이라면 예약이체 대기 건 삭제
-			if("월세앱".equals(rootCapMap.getString("serviceType"))) {
-				trxDAO.deleteChargeSettleFirm(rootCapMap.getString("trxId"));
-			}
-
 		} 
 	}
 
