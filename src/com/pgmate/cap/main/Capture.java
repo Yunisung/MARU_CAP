@@ -627,28 +627,28 @@ public class Capture {
 		}
 
 		if(isRentApp && mchtRentMap.isEquals("settleType", "C+0")) {
-			if(CommonUtil.isNullOrSpace(capDtlMap.getString("risk"))) {
+
+			logger.info("===================================================");
+			logger.info("PG_CHARGE_SETTLE 테이블 승인 INSERT");
+
+			SharedMap<String,Object> chargeSettleMap = createChargeSettleMap(trxCapMap, capDtlMap);
+			insertChargeSettleList.add(chargeSettleMap);
+
+			logger.info("===================================================");
+
+			// 예약이체 insert
+			if(!"분납".equals(trxRentMap.getString("billingMethod"))) {
+				logger.info("===================================================");
+				logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 테이블 INSERT");
+
+				SharedMap<String, Object> mchtTaxMap = trxDAO.getMchtTaxByTaxId(mchtTmnMap.getString("taxId"));
+				SharedMap<String,Object> chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, capDtlMap, trxRentMap, mchtRentMap, mchtTaxMap);
+				insertChargeSettleFirmList.add(chargeSettleFirmMap);
 
 				logger.info("===================================================");
-				logger.info("PG_CHARGE_SETTLE 테이블 승인 INSERT");
+			}
 
-				SharedMap<String,Object> chargeSettleMap = createChargeSettleMap(trxCapMap, capDtlMap);
-				insertChargeSettleList.add(chargeSettleMap);
-
-				logger.info("===================================================");
-
-				// 예약이체 insert
-				if(!"분납".equals(trxRentMap.getString("billingMethod"))) {
-					logger.info("===================================================");
-					logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 테이블 INSERT");
-
-					SharedMap<String, Object> mchtTaxMap = trxDAO.getMchtTaxByTaxId(mchtTmnMap.getString("taxId"));
-					SharedMap<String,Object> chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, capDtlMap, trxRentMap, mchtRentMap, mchtTaxMap);
-					insertChargeSettleFirmList.add(chargeSettleFirmMap);
-
-					logger.info("===================================================");
-				}
-			} else {
+			if(!CommonUtil.isNullOrSpace(capDtlMap.getString("risk"))) {
 				// risk가 존재한다면
 				// Noti Hook 실행
 				String hookAddr = mchtRentMap.getString("riskChangeNotiAddr");
