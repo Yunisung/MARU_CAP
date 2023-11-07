@@ -852,7 +852,7 @@ public class Capture {
 		trxCapMap.put("acquirer"	, trxRfdMap.getString("acquirer"));
 		trxCapMap.put("authCd"		, trxRfdMap.getString("authCd"));
 		trxCapMap.put("trxDay"		, trxRfdMap.getString("regDay"));
-		trxCapMap.put("serviceType"	, trxRfdMap.getString("serviceType"));
+		trxCapMap.put("serviceType"	, rootCapMap.getString("serviceType"));
 		trxCapMap.put("regDay"		, trxRfdMap.getString("regDay"));
 		trxCapMap.put("regTime"		, trxRfdMap.getString("regTime"));
 		trxCapMap.put("regDate"		, CommonUtil.getCurrentTimestamp());
