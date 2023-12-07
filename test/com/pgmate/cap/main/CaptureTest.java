@@ -48,10 +48,10 @@ public class CaptureTest {
     @Test
     public void captureRentAppPay() {
         SharedMap<String,Object> trxPayMap = new SharedMap();
-        String trxId = "T231025043414";
-        String trackId = "test-1698218723708";
+        String trxId = "T231025043416";
+        String trackId = "test-1698218723709";
         trxPayMap.put("trxId", trxId);
-        trxPayMap.put("mchtId", "bktest001");
+        trxPayMap.put("mchtId", "rtt20231129144047");
         trxPayMap.put("tmnId", "TMN000029");
         trxPayMap.put("trackId", trackId);
         trxPayMap.put("payerName", "오세창");
@@ -65,7 +65,7 @@ public class CaptureTest {
         trxPayMap.put("last4", "404*");
         trxPayMap.put("status", "승인");
         trxPayMap.put("prodId", "pdt_139f-d07791-119-d3518");
-        trxPayMap.put("rentId", "rent_ea77-3707ca-4e0-ac173");
+        trxPayMap.put("rentId", "rent_121a-3a5f96-5b2-6fa88");
         trxPayMap.put("issuer", "국민");
         trxPayMap.put("acquirer", "국민");
         trxPayMap.put("reqDay", "20231030");
@@ -80,6 +80,7 @@ public class CaptureTest {
         trxPayMap.put("regTime", "162541");
 
         capture.capture(trxPayMap);
+        capture.reassignChargeSettleFirm();
     }
 
     @Test

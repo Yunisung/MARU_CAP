@@ -9,8 +9,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class TrxDAOTest {
 
@@ -54,26 +57,75 @@ public class TrxDAOTest {
     @Test
     public void testRentStlAmount() {
         Capture capture = new Capture();
-        long val = capture.calcRentStlAmount(104400, 0.04);
-        logger.debug("result {}", val);
+        // 반올림
+//        long val = capture.calcRentStlAmount(195445, 0.036);
+//        logger.debug("result {}", val);
+//
+//        long val2 = capture.calcRentStlAmount(138267, 0.036);
+//        logger.debug("result {}", val2);
+//
+//        long val3 = capture.calcRentStlAmount(449, 0.036);
+//        logger.debug("result {}", val3);
+//
+//        // 0.04444 -> 0.048884
+//        long val4 = capture.calcRentStlAmount(577093, 0.036);
+//        logger.debug("result {}", val4);
+//
+//        // 0.0444 -> 0.04884
+//        long val5 = capture.calcRentStlAmount(10267673, 0.036);
+//        logger.debug("result {}", val5);
 
-        long val2 = capture.calcRentStlAmount(104840, 0.044);
-        logger.debug("result {}", val2);
-
-        long val3 = capture.calcRentStlAmount(209900, 0.045);
-        logger.debug("result {}", val3);
-
-        // 0.04444 -> 0.048884
-        long val4 = capture.calcRentStlAmount(1048884, 0.04444);
-        logger.debug("result {}", val4);
-
+        // 올림
         // 0.0444 -> 0.04884
-        long val5 = capture.calcRentStlAmount(104884, 0.0444);
-        logger.debug("result {}", val5);
-
-        // 0.0444 -> 0.04884
-        long val6 = capture.calcRentStlAmount(200000 + 9768, 0.0444);
+        long val6 = capture.calcRentStlAmount(1043, 0.036);
         logger.debug("result {}", val6);
 
+        long val7 = capture.calcRentStlAmount(115741, 0.036);
+        logger.debug("result {}", val7);
+
+    }
+
+    @Test
+    public void sample() {
+        /*long aaa = CommonUtil.parseLong("20231205");
+        logger.debug("aaa : {}", aaa);
+
+        long bbb = CommonUtil.parseLong(CommonUtil.getCurrentDate("yyyyMMdd"));
+        logger.debug("bbb : {}", bbb);
+
+        assertTrue(aaa <= bbb);*/
+
+
+        List<SharedMap<String, Object>> insertChargeSettleFirmList = new ArrayList<>();
+        SharedMap<String, Object> a = new SharedMap<>();
+        a.put("mchtId", "a");
+        a.put("pubDay", "20230101");
+
+        SharedMap<String, Object> b = new SharedMap<>();
+        b.put("mchtId", "b");
+        b.put("pubDay", "20230101");
+
+        SharedMap<String, Object> c = new SharedMap<>();
+        c.put("mchtId", "a");
+        c.put("pubDay", "20230120");
+
+        SharedMap<String, Object> d = new SharedMap<>();
+        d.put("mchtId", "a");
+        d.put("pubDay", "20230101");
+
+        SharedMap<String, Object> e = new SharedMap<>();
+        e.put("mchtId", "b");
+        e.put("pubDay", "20230120");
+
+        insertChargeSettleFirmList.add(a);
+        insertChargeSettleFirmList.add(b);
+        insertChargeSettleFirmList.add(c);
+        insertChargeSettleFirmList.add(d);
+        insertChargeSettleFirmList.add(e);
+
+        Map<String, Map<String, List<SharedMap<String, Object>>>> sameTransferDayMap =
+                insertChargeSettleFirmList.stream().collect(Collectors.groupingBy(i -> i.getString("mchtId"), Collectors.groupingBy(i -> i.getString("pubDay"))));
+
+        logger.info("size: {}", sameTransferDayMap.size());
     }
 }

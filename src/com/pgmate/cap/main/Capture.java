@@ -6,8 +6,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.pgmate.cap.hook.RiskChangeHook;
+import com.pgmate.lib.dao.RecordSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +37,12 @@ public class Capture {
 	private List<SharedMap<String,Object>> insertCapSubList = new ArrayList<SharedMap<String,Object>>();
 	private List<SharedMap<String,Object>> insertChargeSettleList = new ArrayList<SharedMap<String,Object>>();
 	private List<SharedMap<String,Object>> insertChargeSettleFirmList = new ArrayList<SharedMap<String,Object>>();
+	private List<SharedMap<String,Object>> insertChargeSettleFirmPartList = new ArrayList<SharedMap<String,Object>>();
 
 	private List<String> warningList = new ArrayList<String>();
 	private List<String[]> riskList  = new ArrayList<String[]>();
+
+	private static final String RENT_PUB_TIME = "004000";
 	
 	
 	public Capture() {
@@ -57,6 +63,11 @@ public class Capture {
 				capture(trxPayMap);
 				realTimePay(trxPayMap, "0");
 			}
+
+			// 예약이체 재정렬(분납건 처리)
+			if(insertChargeSettleFirmPartList.size() > 0) {
+				reassignChargeSettleFirm();
+			}
 			       
 			logger.info("capture inserted : {}",trxBatchDAO.insertTrxCap(insertCapList, insertCapDtlList));
 			logger.info("capture sub inserted : {}",trxBatchDAO.insertTrxCapSub(insertCapSubList));
@@ -70,6 +81,7 @@ public class Capture {
 		insertCapSubList 	= new ArrayList<SharedMap<String,Object>>();
 		insertChargeSettleList = new ArrayList<SharedMap<String,Object>>();
 		insertChargeSettleFirmList = new ArrayList<SharedMap<String,Object>>();
+		insertChargeSettleFirmPartList = new ArrayList<SharedMap<String,Object>>();
 
 		List<SharedMap<String,Object>> trxRfdList = trxDAO.getTrxRfd();
 		i=1;
@@ -120,8 +132,75 @@ public class Capture {
 				
 		loadMap = null;
 	}
-	
-	
+
+	public void reassignChargeSettleFirm() {
+		logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 재정렬");
+
+		List<SharedMap<String,Object>> newInsertChargeSettleFirmList = new ArrayList<>();
+		Map<String, Map<String, List<SharedMap<String, Object>>>> groupingFirmMap =
+				insertChargeSettleFirmPartList.stream()
+						.collect(Collectors.groupingBy(c -> c.getString("mchtId"), Collectors.groupingBy(c -> c.getString("pubDay"))));
+
+		// 같은 이체일자의 경우 rootTrxId 발급해서 신규추가
+		for(String mchtId: groupingFirmMap.keySet()) {
+			Map<String, List<SharedMap<String, Object>>> mchtFirmMap = groupingFirmMap.get(mchtId);
+			long balance = trxDAO.getMchtBalance(mchtId).getLong("balance");
+			SharedMap<String, Object> mchtTaxMap = trxDAO.getTaxMapByMchtId(mchtId);
+			SharedMap<String, Object> mchtRentMap = trxDAO.getMchtRentByMchtId(mchtId);
+
+			for(String pubDay: mchtFirmMap.keySet()) {
+				List<SharedMap<String, Object>> sameTransferDayList = mchtFirmMap.get(pubDay);
+
+				// 분납건 집계 처리
+				SharedMap<String, Object> sumFeeMap = new SharedMap<>();
+				String regDate = CommonUtil.getCurrentDate("yyyyMMddHHmmss");
+				sumFeeMap.put("trxId", trxDAO.getChargeSettleTrxId());
+				sumFeeMap.put("trxType", 	"집계");
+				sumFeeMap.put("transferType", "예약");
+				sumFeeMap.put("mchtId"	, mchtId);
+				sumFeeMap.put("trackId", "rent-" + CommonUtil.getCurrentDate("yyyyMMddhhmmss"));
+				sumFeeMap.put("pubDay"	, pubDay);
+				sumFeeMap.put("pubTime"	, RENT_PUB_TIME);
+				sumFeeMap.put("status"	, "대기");
+				sumFeeMap.put("retry"	, 0);
+				sumFeeMap.put("trxDay",  regDate.substring(0, 8));
+				sumFeeMap.put("trxTime", regDate.substring(8));
+				sumFeeMap.put("bankFee"	, 0);
+				sumFeeMap.put("balance", balance);
+				sumFeeMap.put("resultCd"	, "");
+				sumFeeMap.put("resultMsg"	, "");
+				sumFeeMap.put("refId"		, "");
+				sumFeeMap.put("rootTrxId"	, "");
+				sumFeeMap.put("account"	, trxDAO.getAESEnc(mchtTaxMap.getString("account")));
+				sumFeeMap.put("bankCd"	, mchtTaxMap.getString("bankCd"));
+				sumFeeMap.put("bankName"	, mchtTaxMap.getString("bankName"));
+				sumFeeMap.put("holder"	, trxDAO.getAESEnc(mchtTaxMap.getString("accntHolder")));
+				sumFeeMap.put("recordInfo", mchtRentMap.getString("sender"));
+				sumFeeMap.put("regId"		, mchtId);
+				sumFeeMap.put("regDay"	, regDate.substring(0, 8));
+				for (SharedMap<String, Object> partMap : sameTransferDayList) {
+					// 집계건 생성
+					sumFeeMap.put("amount", partMap.getLong("amount") + sumFeeMap.getLong("amount"));
+					sumFeeMap.put("fee", 	partMap.getLong("fee") + sumFeeMap.getLong("fee"));
+					sumFeeMap.put("feeVat", partMap.getLong("feeVat") + sumFeeMap.getLong("feeVat"));
+					sumFeeMap.put("netAmount", partMap.getLong("netAmount") + sumFeeMap.getLong("netAmount"));
+
+					// child 일반건 rootTrxId 변경 후 insert
+					partMap.put("rootTrxId", sumFeeMap.getString("trxId"));
+					newInsertChargeSettleFirmList.add(partMap);
+				}
+				logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 집계건 생성 [{}]", sumFeeMap.getString("trxId"));
+				// 집계건 insert
+				newInsertChargeSettleFirmList.add(sumFeeMap);
+			}
+		}
+
+		// 재배치한 list에서 신규 분납건 insert
+		newInsertChargeSettleFirmList.stream().forEach(x -> {
+			this.insertChargeSettleFirmList.add(x);
+		});
+	}
+
 	public void capture(SharedMap<String,Object> trxPayMap) {
 		SharedMap<String, Object> mchtMap = trxDAO.getMchtByMchtId(trxPayMap.getString("mchtId"));
 		SharedMap<String, Object> mchtTmnMap = trxDAO.getMchtTmnByTmnId(trxPayMap.getString("tmnId"));
@@ -250,7 +329,8 @@ public class Capture {
 				capDtlMap.put("risk", "월세 최초결제");
 			}
 
-			String billingType = trxRentMap.getString("billingType");
+			// 1회한도와 월한도는 결제시에 체크하여 처리
+			/*String billingType = trxRentMap.getString("billingType");
 			long rentLimitOnce = 0;
 			long rentLimitMonth = 0;
 			if ("월세".equals(billingType)) {
@@ -261,25 +341,28 @@ public class Capture {
 				rentLimitMonth = mchtRentMap.getLong("depositLimitMonth");
 			}
 
-			// 1회한도
-			if (rentLimitOnce > 0) {
-				if (rentLimitOnce < trxCapMap.getLong("amount")) {
-					capDtlMap.put("risk", "월세 1회한도");
+			if(!"선납".equals(trxCapMap.getString("billingMethod"))) {
+				// 1회한도
+				if (rentLimitOnce > 0) {
+					if (rentLimitOnce < trxCapMap.getLong("amount")) {
+						capDtlMap.put("risk", "월세 1회한도");
+					}
 				}
-			}
 
-			// 월한도
-			if (rentLimitMonth > 0) {
-				long monthSum = trxDAO.getRentMonthSum(CommonUtil.getCurrentDate("yyyyMM"), trxPayMap.getString("mchtId"));
-				if (rentLimitMonth < trxCapMap.getLong("amount") + monthSum) {
-					capDtlMap.put("risk", "월세 월한도");
+				// 월한도
+				if (rentLimitMonth > 0) {
+					long monthSum = trxDAO.getRentMonthSum(CommonUtil.getCurrentDate("yyyyMM"), trxPayMap.getString("mchtId"));
+					if (rentLimitMonth < trxCapMap.getLong("amount") + monthSum) {
+						capDtlMap.put("risk", "월세 월한도");
+					}
 				}
-			}
-
-			capDtlMap.put("transferDay", trxRentMap.getString("transferDay"));
-			capDtlMap.put("billingMethod", trxRentMap.getString("billingMethod"));
-			capDtlMap.put("billingType", trxRentMap.getString("billingType"));
+			}*/
 		}
+		// 월세관련
+		capDtlMap.put("transferDay", trxRentMap.getString("transferDay"));
+		capDtlMap.put("billingMethod", trxRentMap.getString("billingMethod"));
+		capDtlMap.put("billingType", trxRentMap.getString("billingType"));
+
 
 		if (!capDtlMap.isNullOrSpace("risk")) {
 			logger.info("capId : {}, risk : {}", trxCapMap.getString("capId"), capDtlMap.getString("risk"));
@@ -629,25 +712,57 @@ public class Capture {
 		if(isRentApp && mchtRentMap.isEquals("settleType", "C+0")) {
 
 			logger.info("===================================================");
-			logger.info("PG_CHARGE_SETTLE 테이블 승인 INSERT");
+			logger.info("PG_CHARGE_SETTLE 테이블 승인 INSERT [{}]", trxCapMap.getString("trxId"));
 
 			SharedMap<String,Object> chargeSettleMap = createChargeSettleMap(trxCapMap, capDtlMap);
 			insertChargeSettleList.add(chargeSettleMap);
 
-			logger.info("===================================================");
-
 			if(CommonUtil.isNullOrSpace(capDtlMap.getString("risk"))) {
 				// risk가 없다면
 				// 예약이체 insert
-				if (!"분납".equals(trxRentMap.getString("billingMethod"))) {
-					logger.info("===================================================");
-					logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 테이블 INSERT");
+				logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 테이블 INSERT [{}]", trxCapMap.getString("trxId"));
+				SharedMap<String, Object> mchtTaxMap = trxDAO.getMchtTaxByTaxId(mchtTmnMap.getString("taxId"));
 
-					SharedMap<String, Object> mchtTaxMap = trxDAO.getMchtTaxByTaxId(mchtTmnMap.getString("taxId"));
-					SharedMap<String, Object> chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, capDtlMap, trxRentMap, mchtRentMap, mchtTaxMap);
+				if (!"분납".equals(trxRentMap.getString("billingMethod"))) {
+					// 분납이 아닐 경우
+					SharedMap<String, Object> chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, capDtlMap, trxRentMap, mchtRentMap, mchtTaxMap, trxCapMap.getLong("amount"), "일반", "");
 					insertChargeSettleFirmList.add(chargeSettleFirmMap);
 
-					logger.info("===================================================");
+				} else {
+					// 분납건이라면 같은 이체예정일의 분납건을 모아 예약이체
+					/*SharedMap<String, Object> existsChargeSettleFirmMap = trxDAO.getChargeSettleFirm(trxCapMap.getString("mchtId"), trxRentMap.getString("transferDay"), "집계");
+					SharedMap<String, Object> chargeSettleFirmMap = null;
+					if(!existsChargeSettleFirmMap.isNullOrSpace("trxId")) {
+						// 기존 예약이체 집합건이 존재한다면 추가 후 집합 건 삭제
+						SharedMap<String, Object> sumFeeMap = new SharedMap<>();
+						long sumAmount = existsChargeSettleFirmMap.getLong("amount") + trxCapMap.getLong("amount");
+						sumFeeMap.put("stlFee", existsChargeSettleFirmMap.getLong("fee") + capDtlMap.getLong("stlFee"));
+						sumFeeMap.put("stlFeeVat", existsChargeSettleFirmMap.getLong("feeVat") + capDtlMap.getLong("stlFeeVat"));
+						sumFeeMap.put("stlAmount", existsChargeSettleFirmMap.getLong("netAmount") + capDtlMap.getLong("stlAmount"));
+
+						chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, sumFeeMap, trxRentMap, mchtRentMap, mchtTaxMap, sumAmount,"집계", existsChargeSettleFirmMap.getString("trxId"));
+						insertChargeSettleFirmList.add(existsChargeSettleFirmMap);
+						trxDAO.deleteChargeSettleFirm();
+					} else {
+						chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, capDtlMap, trxRentMap, mchtRentMap, mchtTaxMap, trxCapMap.getLong("amount"),"집계", "");
+						insertChargeSettleFirmList.add(chargeSettleFirmMap);
+					}*/
+
+					// 이체예정일에 있는 예약이체건 롤백 -> 다시 재정렬 처리
+					RecordSet rset = trxDAO.getChargeSettleFirmChildList(trxCapMap.getString("mchtId"), trxRentMap.getString("transferDay"));
+					if(rset.getRows().size() > 0) {
+						// 동일 이체예정일 예약이체건 모두 가져와 리스트 추가 후 데이터 삭제
+						for (SharedMap<String, Object> childFirmMap : rset.getRows()) {
+							insertChargeSettleFirmPartList.add(childFirmMap);
+							//trxDAO.deleteChargeSettleFirm(childFirmMap.getString("trxId"));
+						}
+						// 집합건(원거래건) 삭제
+						String rootTrxId = rset.getRowFirst().getString("rootTrxId");
+						//trxDAO.deleteChargeSettleFirm(rootTrxId);
+					}
+
+					SharedMap<String, Object> chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, capDtlMap, trxRentMap, mchtRentMap, mchtTaxMap, trxCapMap.getLong("amount"), "일반", "");
+					insertChargeSettleFirmPartList.add(chargeSettleFirmMap);
 				}
 			} else {
 				// risk가 존재한다면
@@ -660,6 +775,9 @@ public class Capture {
 					new RiskChangeHook(hookAddr, ntsMap, "0").start();
 				}
 			}
+
+			logger.info("===================================================");
+
 		//정상결제 완료 건인데 충전정산 실시간 전송 가맹점의 거래건일 경우 가맹점 충전정산 거래내역 테이블 저장
 		} else if(mchtMngMap.isEquals("settleType", "C+0")) {
 			logger.info("===================================================");
@@ -737,31 +855,32 @@ public class Capture {
 	}
 
 	private SharedMap<String,Object> createChargeSettleFirmMap(SharedMap<String,Object> trxCapMap, SharedMap<String,Object> capDtlMap,
-															   SharedMap<String,Object> trxRentMap, SharedMap<String,Object> mchtRentMap, SharedMap<String,Object> mchtTaxMap) {
+															   SharedMap<String,Object> trxRentMap, SharedMap<String,Object> mchtRentMap, SharedMap<String,Object> mchtTaxMap, long amount, String trxType, String rootTrxId) {
 		SharedMap<String,Object> chargeSettleFirmMap = new SharedMap<String,Object>();
 		String regDate = CommonUtil.getCurrentDate("yyyyMMddHHmmss");
-		String pubTime = "004000";
 
 		chargeSettleFirmMap.put("trxId"		, trxCapMap.getString("trxId"));
+		chargeSettleFirmMap.put("trxType"	, trxType);
 		chargeSettleFirmMap.put("transferType"	, "예약");
 		chargeSettleFirmMap.put("mchtId"	, trxCapMap.getString("mchtId"));
 		chargeSettleFirmMap.put("trackId"	, trxCapMap.getString("trackId"));
 		chargeSettleFirmMap.put("pubDay"	, trxRentMap.getString("transferDay"));
-		chargeSettleFirmMap.put("pubTime"	, pubTime);
+		chargeSettleFirmMap.put("pubTime"	, RENT_PUB_TIME);
 		chargeSettleFirmMap.put("status"	, "대기");
 		chargeSettleFirmMap.put("retry"		, 0);
 		chargeSettleFirmMap.put("trxDay"	, regDate.substring(0, 8));
 		chargeSettleFirmMap.put("trxTime"	, regDate.substring(8));
-		chargeSettleFirmMap.put("amount"	, Math.abs(trxCapMap.getLong("amount")));
+		chargeSettleFirmMap.put("amount"	, Math.abs(amount));
 		chargeSettleFirmMap.put("fee"		, Math.abs(capDtlMap.getLong("stlFee")));
 		chargeSettleFirmMap.put("feeVat"	, Math.abs(capDtlMap.getLong("stlFeeVat")));
 		chargeSettleFirmMap.put("bankFee"	, 0);
 		chargeSettleFirmMap.put("netAmount"	, Math.abs(capDtlMap.getLong("stlAmount")));
-		chargeSettleFirmMap.put("balance"	, trxDAO.getMchtBalance(trxCapMap.getString("mchtId")).getLong("balance")+Math.abs(capDtlMap.getLong("stlAmount")));
+//		chargeSettleFirmMap.put("balance"	, trxDAO.getMchtBalance(trxCapMap.getString("mchtId")).getLong("balance")+Math.abs(capDtlMap.getLong("stlAmount")));
+		chargeSettleFirmMap.put("balance"	, trxDAO.getMchtBalance(trxCapMap.getString("mchtId")).getLong("balance"));
 		chargeSettleFirmMap.put("resultCd"	, "");
 		chargeSettleFirmMap.put("resultMsg"	, "");
 		chargeSettleFirmMap.put("refId"		, trxCapMap.getString("capId"));
-		chargeSettleFirmMap.put("rootTrxId"	, "");
+		chargeSettleFirmMap.put("rootTrxId"	, rootTrxId);
 		chargeSettleFirmMap.put("account"	, trxDAO.getAESEnc(mchtTaxMap.getString("account")));
 		chargeSettleFirmMap.put("bankCd"	, mchtTaxMap.getString("bankCd"));
 		chargeSettleFirmMap.put("bankName"	, mchtTaxMap.getString("bankName"));
@@ -1035,7 +1154,7 @@ public class Capture {
 
 			logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 테이블 DELETE");
 
-			// 월세앱 거래건이라면 예약이체 대기 건 삭제
+			// 원거래 예약이체 대기 건 삭제
 			trxDAO.deleteChargeSettleFirm(rootCapMap.getString("trxId"));
 
 			logger.info("===================================================");
@@ -1456,7 +1575,10 @@ public class Capture {
 		long decimal = 10000 * 10000;
 		double perRate = new Double(rate * decimal).doubleValue();
 		double calRate = new Double(decimal / (decimal + perRate)).doubleValue();
-		return new Double(amount * calRate).longValue();
+		//logger.info("계산결과: {}", amount * calRate);
+//		return new Double(amount * calRate).longValue();
+//		return new Double(Math.round(amount * calRate)).longValue();
+		return new Double(Math.ceil(amount * calRate)).longValue();
 	}
 	
 	

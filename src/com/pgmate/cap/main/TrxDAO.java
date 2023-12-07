@@ -189,6 +189,16 @@ public class TrxDAO extends DAO {
 		return rset.getRowFirst();
 	}
 
+	public SharedMap<String, Object> getTaxMapByMchtId(String mchtId) {
+		super.setTable("PG_MCHT_TAX");
+		super.setColumns("*");
+		super.addWhere("mchtId", mchtId);
+
+		RecordSet rset = super.search();
+		super.initRecord();
+		return rset.getRow(0);
+	}
+
 	public SharedMap<String, Object> getAgencyMngById(String agencyId) {
 		String key = "PG_MAM_AGENCY_MNG_" + agencyId;
 		if (Cache.map.containsKey(key)) {
@@ -1306,7 +1316,7 @@ public class TrxDAO extends DAO {
 	public boolean deleteChargeSettleFirm(String trxId) {
 		super.setTable("PG_CHARGE_SETTLE_FIRM_RESERVE");
 		super.addWhere("trxId", trxId);
-		super.addWhere("status", "지급완료", ne);
+		super.addWhere("status", "대기");
 
 		boolean deleted = super.delete();
 		super.initRecord();
@@ -1315,5 +1325,32 @@ public class TrxDAO extends DAO {
 		return deleted;
 	}
 
+	public RecordSet getTrxCapPartRentList(String mchtId, String transferDay){
+		super.setTable("VW_TRX_CAP");
+		super.setColumns("*");
+		super.addWhere("mchtId", mchtId, eq);
+		super.addWhere("transferDay"	,transferDay,eq);
+		super.addWhere("billingMethod"	,"분납",eq);
+		super.addWhere("serviceType", "월세앱", eq);
+		RecordSet rset = super.search();
+		super.initRecord();
+		return rset;
+	}
+
+	public RecordSet getChargeSettleFirmChildList(String mchtId, String transferDay){
+		super.setTable("PG_CHARGE_SETTLE_FIRM_RESERVE");
+		super.setColumns("*");
+		super.addWhere("mchtId", mchtId, eq);
+		super.addWhere("pubDay"	,transferDay,eq);
+		super.addWhere("rootTrxId","",ne);
+		super.addWhere("status", "대기");
+		RecordSet rset = super.search();
+		super.initRecord();
+		return rset;
+	}
+
+	public synchronized String getChargeSettleTrxId() {
+		return "CS" + getFunction("FN_NEXTVAL2", "TRN");
+	}
 
 }
