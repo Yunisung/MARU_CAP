@@ -64,9 +64,9 @@ public class Capture {
 				realTimePay(trxPayMap, "0");
 			}
 
-			// 예약이체 재정렬(분납건 처리)
+			// 분납건 insert 처리
 			if(insertChargeSettleFirmPartList.size() > 0) {
-				reassignChargeSettleFirm();
+				addPartToChargeSettleFirm();
 			}
 			       
 			logger.info("capture inserted : {}",trxBatchDAO.insertTrxCap(insertCapList, insertCapDtlList));
@@ -92,9 +92,16 @@ public class Capture {
 				refund(trxRfdMap);
 				realTimePay(trxRfdMap, "1");
 			}
+
+			// 분납건 insert 처리
+			if(insertChargeSettleFirmPartList.size() > 0) {
+				addPartToChargeSettleFirm();
+			}
+
 			logger.info("refund inserted : {}",trxBatchDAO.insertTrxCap(insertCapList, insertCapDtlList));
 			logger.info("refund sub inserted : {}",trxBatchDAO.insertTrxCapSub(insertCapSubList));
 			logger.info("refund charge inserted : {}",trxBatchDAO.insertChargeSettle(insertChargeSettleList));
+			logger.info("refund charge firm inserted : {}",trxBatchDAO.insertChargeSettleFirm(insertChargeSettleFirmList));
 		}
 		
 		if(warningList.size() > 0){
@@ -133,7 +140,7 @@ public class Capture {
 		loadMap = null;
 	}
 
-	public void reassignChargeSettleFirm() {
+	public void addPartToChargeSettleFirm() {
 		logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 재정렬");
 
 		List<SharedMap<String,Object>> newInsertChargeSettleFirmList = new ArrayList<>();
@@ -151,51 +158,53 @@ public class Capture {
 			for(String pubDay: mchtFirmMap.keySet()) {
 				List<SharedMap<String, Object>> sameTransferDayList = mchtFirmMap.get(pubDay);
 
-				// 분납건 집계 처리
-				SharedMap<String, Object> sumFeeMap = new SharedMap<>();
-				String regDate = CommonUtil.getCurrentDate("yyyyMMddHHmmss");
-				sumFeeMap.put("trxId", trxDAO.getChargeSettleTrxId());
-				sumFeeMap.put("trxType", 	"집계");
-				sumFeeMap.put("transferType", "예약");
-				sumFeeMap.put("mchtId"	, mchtId);
-				sumFeeMap.put("trackId", "rent-" + CommonUtil.getCurrentDate("yyyyMMddhhmmss"));
-				sumFeeMap.put("pubDay"	, pubDay);
-				sumFeeMap.put("pubTime"	, RENT_PUB_TIME);
-				sumFeeMap.put("status"	, "대기");
-				sumFeeMap.put("retry"	, 0);
-				sumFeeMap.put("trxDay",  regDate.substring(0, 8));
-				sumFeeMap.put("trxTime", regDate.substring(8));
-				sumFeeMap.put("bankFee"	, 0);
-				sumFeeMap.put("balance", balance);
-				sumFeeMap.put("resultCd"	, "");
-				sumFeeMap.put("resultMsg"	, "");
-				sumFeeMap.put("refId"		, "");
-				sumFeeMap.put("rootTrxId"	, "");
-				sumFeeMap.put("account"	, trxDAO.getAESEnc(mchtTaxMap.getString("account")));
-				sumFeeMap.put("bankCd"	, mchtTaxMap.getString("bankCd"));
-				sumFeeMap.put("bankName"	, mchtTaxMap.getString("bankName"));
-				sumFeeMap.put("holder"	, trxDAO.getAESEnc(mchtTaxMap.getString("accntHolder")));
-				sumFeeMap.put("recordInfo", mchtRentMap.getString("sender"));
-				sumFeeMap.put("regId"		, mchtId);
-				sumFeeMap.put("regDay"	, regDate.substring(0, 8));
-				for (SharedMap<String, Object> partMap : sameTransferDayList) {
-					// 집계건 생성
-					sumFeeMap.put("amount", partMap.getLong("amount") + sumFeeMap.getLong("amount"));
-					sumFeeMap.put("fee", 	partMap.getLong("fee") + sumFeeMap.getLong("fee"));
-					sumFeeMap.put("feeVat", partMap.getLong("feeVat") + sumFeeMap.getLong("feeVat"));
-					sumFeeMap.put("netAmount", partMap.getLong("netAmount") + sumFeeMap.getLong("netAmount"));
+				if(sameTransferDayList.size() > 0) {
+					// 분납건 집계 처리
+					SharedMap<String, Object> sumFeeMap = new SharedMap<>();
+					String regDate = CommonUtil.getCurrentDate("yyyyMMddHHmmss");
+					sumFeeMap.put("trxId", trxDAO.getChargeSettleTrxId());
+					sumFeeMap.put("trxType", "집계");
+					sumFeeMap.put("transferType", "예약");
+					sumFeeMap.put("mchtId", mchtId);
+					sumFeeMap.put("trackId", "rent-" + CommonUtil.getCurrentDate("yyyyMMddhhmmss"));
+					sumFeeMap.put("pubDay", pubDay);
+					sumFeeMap.put("pubTime", RENT_PUB_TIME);
+					sumFeeMap.put("status", "대기");
+					sumFeeMap.put("retry", 0);
+					sumFeeMap.put("trxDay", regDate.substring(0, 8));
+					sumFeeMap.put("trxTime", regDate.substring(8));
+					sumFeeMap.put("bankFee", 0);
+					sumFeeMap.put("balance", balance);
+					sumFeeMap.put("resultCd", "");
+					sumFeeMap.put("resultMsg", "");
+					sumFeeMap.put("refId", "");
+					sumFeeMap.put("rootTrxId", "");
+					sumFeeMap.put("account", trxDAO.getAESEnc(mchtTaxMap.getString("account")));
+					sumFeeMap.put("bankCd", mchtTaxMap.getString("bankCd"));
+					sumFeeMap.put("bankName", mchtTaxMap.getString("bankName"));
+					sumFeeMap.put("holder", trxDAO.getAESEnc(mchtTaxMap.getString("accntHolder")));
+					sumFeeMap.put("recordInfo", mchtRentMap.getString("sender"));
+					sumFeeMap.put("regId", mchtId);
+					sumFeeMap.put("regDay", regDate.substring(0, 8));
+					for (SharedMap<String, Object> partMap : sameTransferDayList) {
+						// 집계건 생성
+						sumFeeMap.put("amount", partMap.getLong("amount") + sumFeeMap.getLong("amount"));
+						sumFeeMap.put("fee", partMap.getLong("fee") + sumFeeMap.getLong("fee"));
+						sumFeeMap.put("feeVat", partMap.getLong("feeVat") + sumFeeMap.getLong("feeVat"));
+						sumFeeMap.put("netAmount", partMap.getLong("netAmount") + sumFeeMap.getLong("netAmount"));
 
-					// child 일반건 rootTrxId 변경 후 insert
-					partMap.put("rootTrxId", sumFeeMap.getString("trxId"));
-					newInsertChargeSettleFirmList.add(partMap);
+						// child 일반건 rootTrxId 변경 후 insert
+						partMap.put("rootTrxId", sumFeeMap.getString("trxId"));
+						newInsertChargeSettleFirmList.add(partMap);
+					}
+					logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 집계건 생성 [{}]", sumFeeMap.getString("trxId"));
+					// 집계건 insert
+					newInsertChargeSettleFirmList.add(sumFeeMap);
 				}
-				logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 집계건 생성 [{}]", sumFeeMap.getString("trxId"));
-				// 집계건 insert
-				newInsertChargeSettleFirmList.add(sumFeeMap);
 			}
 		}
 
-		// 재배치한 list에서 신규 분납건 insert
+		// 신규 분납건 insert
 		newInsertChargeSettleFirmList.stream().forEach(x -> {
 			this.insertChargeSettleFirmList.add(x);
 		});
@@ -328,35 +337,6 @@ public class Capture {
 			if ("대기".equals(mchtRentMap.getString("contractStatus"))) {
 				capDtlMap.put("risk", "월세 최초결제");
 			}
-
-			// 1회한도와 월한도는 결제시에 체크하여 처리
-			/*String billingType = trxRentMap.getString("billingType");
-			long rentLimitOnce = 0;
-			long rentLimitMonth = 0;
-			if ("월세".equals(billingType)) {
-				rentLimitOnce = mchtRentMap.getLong("rentLimitOnce");
-				rentLimitMonth = mchtRentMap.getLong("rentLimitMonth");
-			} else if ("보증금".equals(billingType)) {
-				rentLimitOnce = mchtRentMap.getLong("depositLimitOnce");
-				rentLimitMonth = mchtRentMap.getLong("depositLimitMonth");
-			}
-
-			if(!"선납".equals(trxCapMap.getString("billingMethod"))) {
-				// 1회한도
-				if (rentLimitOnce > 0) {
-					if (rentLimitOnce < trxCapMap.getLong("amount")) {
-						capDtlMap.put("risk", "월세 1회한도");
-					}
-				}
-
-				// 월한도
-				if (rentLimitMonth > 0) {
-					long monthSum = trxDAO.getRentMonthSum(CommonUtil.getCurrentDate("yyyyMM"), trxPayMap.getString("mchtId"));
-					if (rentLimitMonth < trxCapMap.getLong("amount") + monthSum) {
-						capDtlMap.put("risk", "월세 월한도");
-					}
-				}
-			}*/
 		}
 		// 월세관련
 		capDtlMap.put("transferDay", trxRentMap.getString("transferDay"));
@@ -729,36 +709,17 @@ public class Capture {
 					insertChargeSettleFirmList.add(chargeSettleFirmMap);
 
 				} else {
-					// 분납건이라면 같은 이체예정일의 분납건을 모아 예약이체
-					/*SharedMap<String, Object> existsChargeSettleFirmMap = trxDAO.getChargeSettleFirm(trxCapMap.getString("mchtId"), trxRentMap.getString("transferDay"), "집계");
-					SharedMap<String, Object> chargeSettleFirmMap = null;
-					if(!existsChargeSettleFirmMap.isNullOrSpace("trxId")) {
-						// 기존 예약이체 집합건이 존재한다면 추가 후 집합 건 삭제
-						SharedMap<String, Object> sumFeeMap = new SharedMap<>();
-						long sumAmount = existsChargeSettleFirmMap.getLong("amount") + trxCapMap.getLong("amount");
-						sumFeeMap.put("stlFee", existsChargeSettleFirmMap.getLong("fee") + capDtlMap.getLong("stlFee"));
-						sumFeeMap.put("stlFeeVat", existsChargeSettleFirmMap.getLong("feeVat") + capDtlMap.getLong("stlFeeVat"));
-						sumFeeMap.put("stlAmount", existsChargeSettleFirmMap.getLong("netAmount") + capDtlMap.getLong("stlAmount"));
-
-						chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, sumFeeMap, trxRentMap, mchtRentMap, mchtTaxMap, sumAmount,"집계", existsChargeSettleFirmMap.getString("trxId"));
-						insertChargeSettleFirmList.add(existsChargeSettleFirmMap);
-						trxDAO.deleteChargeSettleFirm();
-					} else {
-						chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, capDtlMap, trxRentMap, mchtRentMap, mchtTaxMap, trxCapMap.getLong("amount"),"집계", "");
-						insertChargeSettleFirmList.add(chargeSettleFirmMap);
-					}*/
-
-					// 이체예정일에 있는 예약이체건 롤백 -> 다시 재정렬 처리
+					// 이체예정일에 있는 예약이체건 롤백
 					RecordSet rset = trxDAO.getChargeSettleFirmChildList(trxCapMap.getString("mchtId"), trxRentMap.getString("transferDay"));
 					if(rset.getRows().size() > 0) {
 						// 동일 이체예정일 예약이체건 모두 가져와 리스트 추가 후 데이터 삭제
 						for (SharedMap<String, Object> childFirmMap : rset.getRows()) {
 							insertChargeSettleFirmPartList.add(childFirmMap);
-							//trxDAO.deleteChargeSettleFirm(childFirmMap.getString("trxId"));
+							trxDAO.deleteChargeSettleFirm(childFirmMap.getString("trxId"));
 						}
 						// 집합건(원거래건) 삭제
 						String rootTrxId = rset.getRowFirst().getString("rootTrxId");
-						//trxDAO.deleteChargeSettleFirm(rootTrxId);
+						trxDAO.deleteChargeSettleFirm(rootTrxId);
 					}
 
 					SharedMap<String, Object> chargeSettleFirmMap = createChargeSettleFirmMap(trxCapMap, capDtlMap, trxRentMap, mchtRentMap, mchtTaxMap, trxCapMap.getLong("amount"), "일반", "");
@@ -1154,8 +1115,26 @@ public class Capture {
 
 			logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 테이블 DELETE");
 
-			// 원거래 예약이체 대기 건 삭제
-			trxDAO.deleteChargeSettleFirm(rootCapMap.getString("trxId"));
+			if(!"분납".equals(rootCapMap.getString("billingMethod"))) {
+				// 원거래 예약이체 대기 건 삭제
+				trxDAO.deleteChargeSettleFirm(rootCapMap.getString("trxId"));
+			} else {
+				// 분납 취소되면 삭제 후 재구성
+				String rootTrxId = trxDAO.getChargeSettleFirm(rootCapMap.getString("trxId")).getString("rootTrxId");
+				RecordSet rset = trxDAO.getChargeSettleFirmChildList(rootTrxId);
+				if(rset.getRows().size() > 0) {
+					// 동일 이체예정일 예약이체건 모두 가져와 리스트 추가 후 데이터 삭제
+					for (SharedMap<String, Object> childFirmMap : rset.getRows()) {
+						if(!childFirmMap.getString("trxId").equals(rootCapMap.getString("trxId"))) {
+							insertChargeSettleFirmPartList.add(childFirmMap);
+						}
+					}
+				}
+				// 분납 하위건 삭제
+				trxDAO.deleteChargeSettleFirmByRootTrxId(rootTrxId);
+				// 집합건(원거래건) 삭제
+				trxDAO.deleteChargeSettleFirm(rootTrxId);
+			}
 
 			logger.info("===================================================");
 		}

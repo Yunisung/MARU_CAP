@@ -80,7 +80,7 @@ public class CaptureTest {
         trxPayMap.put("regTime", "162541");
 
         capture.capture(trxPayMap);
-        capture.reassignChargeSettleFirm();
+        capture.addPartToChargeSettleFirm();
     }
 
     @Test
@@ -88,8 +88,8 @@ public class CaptureTest {
         SharedMap<String,Object> trxRfdMap = new SharedMap();
         String trxId = "T231025043414";
         String trackId = "test-1698218723708";
-        String rootTtrxId = "T231025043413";
-        String rootTrackId = "test-1698218723707";
+        String rootTtrxId = "T231121043972";
+        String rootTrackId = "test-1700539490246";
 
         trxRfdMap.put("trxId", trxId);
         trxRfdMap.put("mchtId", "bktest001");
@@ -123,6 +123,7 @@ public class CaptureTest {
         trxRfdMap.put("regTime", "162541");
 
         capture.refund(trxRfdMap);
+        capture.addPartToChargeSettleFirm();
     }
 
 

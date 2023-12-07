@@ -1325,6 +1325,18 @@ public class TrxDAO extends DAO {
 		return deleted;
 	}
 
+	public boolean deleteChargeSettleFirmByRootTrxId(String rootTrxId) {
+		super.setTable("PG_CHARGE_SETTLE_FIRM_RESERVE");
+		super.addWhere("rootTrxId", rootTrxId);
+		super.addWhere("status", "대기");
+
+		boolean deleted = super.delete();
+		super.initRecord();
+		logger.info("set PG_CHARGE_SETTLE_FIRM_RESERVE Child delete : [{}][{}]", rootTrxId, deleted);
+
+		return deleted;
+	}
+
 	public RecordSet getTrxCapPartRentList(String mchtId, String transferDay){
 		super.setTable("VW_TRX_CAP");
 		super.setColumns("*");
@@ -1347,6 +1359,26 @@ public class TrxDAO extends DAO {
 		RecordSet rset = super.search();
 		super.initRecord();
 		return rset;
+	}
+
+	public RecordSet getChargeSettleFirmChildList(String rootTrxId){
+		super.setTable("PG_CHARGE_SETTLE_FIRM_RESERVE");
+		super.setColumns("*");
+		super.addWhere("rootTrxId",rootTrxId,eq);
+		super.addWhere("status", "대기");
+		RecordSet rset = super.search();
+		super.initRecord();
+		return rset;
+	}
+
+	public SharedMap<String, Object> getChargeSettleFirm(String trxId){
+		super.setTable("PG_CHARGE_SETTLE_FIRM_RESERVE");
+		super.setColumns("*");
+		super.addWhere("trxId", trxId, eq);
+		super.addWhere("status", "대기");
+		RecordSet rset = super.search();
+		super.initRecord();
+		return rset.getRowFirst();
 	}
 
 	public synchronized String getChargeSettleTrxId() {
