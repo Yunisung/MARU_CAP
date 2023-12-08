@@ -339,7 +339,7 @@ public class Capture {
 			}
 		}
 		// 월세관련
-		capDtlMap.put("transferDay", trxRentMap.getString("transferDay"));
+		//capDtlMap.put("transferDay", trxRentMap.getString("transferDay"));
 		capDtlMap.put("billingMethod", trxRentMap.getString("billingMethod"));
 		capDtlMap.put("billingType", trxRentMap.getString("billingType"));
 
@@ -710,7 +710,8 @@ public class Capture {
 
 				} else {
 					// 이체예정일에 있는 예약이체건 롤백
-					RecordSet rset = trxDAO.getChargeSettleFirmChildList(trxCapMap.getString("mchtId"), trxRentMap.getString("transferDay"));
+					String transferDay = calcTransferDay(mchtTaxMap.getString("transferDay"));
+					RecordSet rset = trxDAO.getChargeSettleFirmChildList(trxCapMap.getString("mchtId"), transferDay);
 					if(rset.getRows().size() > 0) {
 						// 동일 이체예정일 예약이체건 모두 가져와 리스트 추가 후 데이터 삭제
 						for (SharedMap<String, Object> childFirmMap : rset.getRows()) {
@@ -748,6 +749,19 @@ public class Capture {
 			insertChargeSettleList.add(chargeSettleMap);
 
 			logger.info("===================================================");
+		}
+	}
+
+	private String calcTransferDay(String transferDay) {
+		String curYearMonth = CommonUtil.getCurrentDate("yyyyMM");
+		long curDay = CommonUtil.parseLong(CommonUtil.getCurrentDate("dd"));
+
+		if(CommonUtil.parseLong(transferDay) > curDay) {
+			return curYearMonth + transferDay;
+		} else {
+			String today = CommonUtil.getCurrentDate("yyyyMMdd");
+			String nextMonth = CommonUtil.getOpDate(GregorianCalendar.MONTH,1,today).substring(0,6);
+			return nextMonth + transferDay;
 		}
 	}
 
@@ -825,7 +839,7 @@ public class Capture {
 		chargeSettleFirmMap.put("transferType"	, "예약");
 		chargeSettleFirmMap.put("mchtId"	, trxCapMap.getString("mchtId"));
 		chargeSettleFirmMap.put("trackId"	, trxCapMap.getString("trackId"));
-		chargeSettleFirmMap.put("pubDay"	, trxRentMap.getString("transferDay"));
+		chargeSettleFirmMap.put("pubDay"	, calcTransferDay(mchtTaxMap.getString("transferDay")));
 		chargeSettleFirmMap.put("pubTime"	, RENT_PUB_TIME);
 		chargeSettleFirmMap.put("status"	, "대기");
 		chargeSettleFirmMap.put("retry"		, 0);
@@ -1070,7 +1084,7 @@ public class Capture {
 		capDtlMap.put("stlInterRate", rootCapMap.getDouble("stlInterRate"));
 		capDtlMap.put("stlVanInterRate", rootCapMap.getDouble("stlVanInterRate"));
 
-		capDtlMap.put("transferDay", rootCapMap.getString("transferDay"));
+		//capDtlMap.put("transferDay", rootCapMap.getString("transferDay"));
 		capDtlMap.put("billingMethod", rootCapMap.getString("billingMethod"));
 		capDtlMap.put("billingType", rootCapMap.getString("billingType"));
 
