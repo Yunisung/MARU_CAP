@@ -710,7 +710,7 @@ public class Capture {
 
 				} else {
 					// 이체예정일에 있는 예약이체건 롤백
-					String transferDay = calcTransferDay(mchtTaxMap.getString("transferDay"));
+					String transferDay = calcTransferDay(mchtRentMap.getString("transferDay"));
 					RecordSet rset = trxDAO.getChargeSettleFirmChildList(trxCapMap.getString("mchtId"), transferDay);
 					if(rset.getRows().size() > 0) {
 						// 동일 이체예정일 예약이체건 모두 가져와 리스트 추가 후 데이터 삭제
@@ -839,7 +839,7 @@ public class Capture {
 		chargeSettleFirmMap.put("transferType"	, "예약");
 		chargeSettleFirmMap.put("mchtId"	, trxCapMap.getString("mchtId"));
 		chargeSettleFirmMap.put("trackId"	, trxCapMap.getString("trackId"));
-		chargeSettleFirmMap.put("pubDay"	, calcTransferDay(mchtTaxMap.getString("transferDay")));
+		chargeSettleFirmMap.put("pubDay"	, calcTransferDay(mchtRentMap.getString("transferDay")));
 		chargeSettleFirmMap.put("pubTime"	, RENT_PUB_TIME);
 		chargeSettleFirmMap.put("status"	, "대기");
 		chargeSettleFirmMap.put("retry"		, 0);
