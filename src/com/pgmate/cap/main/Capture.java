@@ -1144,10 +1144,13 @@ public class Capture {
 						}
 					}
 				}
-				// 분납 하위건 삭제
-				trxDAO.deleteChargeSettleFirmByRootTrxId(rootTrxId);
-				// 집합건(원거래건) 삭제
-				trxDAO.deleteChargeSettleFirm(rootTrxId);
+				if(!CommonUtil.isNullOrSpace(rootTrxId)) {
+					// 분납 하위건 삭제
+					if (trxDAO.deleteChargeSettleFirmByRootTrxId(rootTrxId)) {
+						// 집합건(원거래건) 삭제
+						trxDAO.deleteChargeSettleFirm(rootTrxId);
+					}
+				}
 			}
 
 			logger.info("===================================================");
