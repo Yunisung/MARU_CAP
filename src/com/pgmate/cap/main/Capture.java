@@ -413,6 +413,7 @@ public class Capture {
 				// 월세앱은 선지급 수수료 제외
 				String billingType = trxRentMap.getString("billingType");
 				String contractType = mchtRentMap.getString("contractType");
+				String chargeTarget = mchtRentMap.getString("chargeTarget");
 				double rentRate = 0.0;
 				if ("월세".equals(billingType)) {
 					rentRate = mchtRentMap.getDouble("rentRate");
@@ -422,14 +423,15 @@ public class Capture {
 				capDtlMap.put("stlRate", rentRate + stlInterRate);
 				capDtlMap.put("stlType", mchtRentMap.getString("settleType"));
 
-				if ("임차인".equals(contractType)) {
-					//임차일경우
+				if ("임차인".equals(contractType) || ("임대인".equals(contractType) && "임차인".equals(chargeTarget))) {
+					//임차일경우 이거나 임대인이지만 부과대상이 임차인이라면
 					// 정산금액 = 거래금액 * ((1000/ (1000 + 44))
 					long rentStlAmount = calcRentStlAmount(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlRate"));
 					capDtlMap.put("stlFee", calcFee(rentStlAmount, capDtlMap.getDouble("stlRate")));
 					capDtlMap.put("stlFeeVat", calcVat(capDtlMap.getLong("stlFee")));
 					capDtlMap.put("stlAmount", rentStlAmount);
 				} else {
+					// 임대인일 경우
 					capDtlMap.put("stlFee", calcFee(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlRate")));
 					capDtlMap.put("stlFeeVat", calcVat(capDtlMap.getLong("stlFee")));
 					capDtlMap.put("stlAmount", trxCapMap.getLong("amount") - capDtlMap.getLong("stlFee") - capDtlMap.getLong("stlFeeVat"));
