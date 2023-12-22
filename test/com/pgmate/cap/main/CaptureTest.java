@@ -126,5 +126,17 @@ public class CaptureTest {
         capture.addPartToChargeSettleFirm();
     }
 
+    @Test
+    public void executeRefund() {
+
+        List<SharedMap<String,Object>> trxRfdList = trxDAO.getTrxRfd();
+        int i=1;
+        int size = trxRfdList.size();
+        for(SharedMap<String,Object> trxRfdMap : trxRfdList ){
+            logger.info("refund  : {}/{}",i++,size);
+            capture.refund(trxRfdMap);
+        }
+
+    }
 
 }

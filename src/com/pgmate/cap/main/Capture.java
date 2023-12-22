@@ -178,6 +178,7 @@ public class Capture {
 					sumFeeMap.put("resultCd", "");
 					sumFeeMap.put("resultMsg", "");
 					sumFeeMap.put("refId", "");
+					sumFeeMap.put("refTrxId", "");
 					sumFeeMap.put("rootTrxId", "");
 					sumFeeMap.put("account", trxDAO.getAESEnc(mchtTaxMap.getString("account")));
 					sumFeeMap.put("bankCd", mchtTaxMap.getString("bankCd"));
@@ -836,7 +837,8 @@ public class Capture {
 		SharedMap<String,Object> chargeSettleFirmMap = new SharedMap<String,Object>();
 		String regDate = CommonUtil.getCurrentDate("yyyyMMddHHmmss");
 
-		chargeSettleFirmMap.put("trxId"		, trxCapMap.getString("trxId"));
+		String trxId = trxDAO.getChargeSettleTrxId();
+		chargeSettleFirmMap.put("trxId"		, trxId);
 		chargeSettleFirmMap.put("trxType"	, trxType);
 		chargeSettleFirmMap.put("transferType"	, "예약");
 		chargeSettleFirmMap.put("mchtId"	, trxCapMap.getString("mchtId"));
@@ -857,6 +859,7 @@ public class Capture {
 		chargeSettleFirmMap.put("resultCd"	, "");
 		chargeSettleFirmMap.put("resultMsg"	, "");
 		chargeSettleFirmMap.put("refId"		, trxCapMap.getString("capId"));
+		chargeSettleFirmMap.put("refTrxId"	, trxCapMap.getString("trxId"));
 		chargeSettleFirmMap.put("rootTrxId"	, rootTrxId);
 		chargeSettleFirmMap.put("account"	, trxDAO.getAESEnc(mchtTaxMap.getString("account")));
 		chargeSettleFirmMap.put("bankCd"	, mchtTaxMap.getString("bankCd"));

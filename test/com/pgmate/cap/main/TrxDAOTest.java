@@ -77,10 +77,10 @@ public class TrxDAOTest {
 
         // 올림
         // 0.0444 -> 0.04884
-        long val6 = capture.calcRentStlAmount(1043, 0.036);
-        logger.debug("result {}", val6);
+//        long val6 = capture.calcRentStlAmount(1043, 0.036);
+//        logger.debug("result {}", val6);
 
-        long val7 = capture.calcRentStlAmount(115741, 0.036);
+        long val7 = capture.calcRentStlAmount(10396, 0.036);
         logger.debug("result {}", val7);
 
     }
