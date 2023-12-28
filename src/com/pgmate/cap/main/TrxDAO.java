@@ -1315,12 +1315,24 @@ public class TrxDAO extends DAO {
 
 	public boolean deleteChargeSettleFirm(String trxId) {
 		super.setTable("PG_CHARGE_SETTLE_FIRM_RESERVE");
-		super.addWhere("refTrxId", trxId);
+		super.addWhere("trxId", trxId);
 		super.addWhere("status", "대기");
 
 		boolean deleted = super.delete();
 		super.initRecord();
 		logger.info("set PG_CHARGE_SETTLE_FIRM_RESERVE delete : [{}][{}]", trxId, deleted);
+
+		return deleted;
+	}
+
+	public boolean deleteChargeSettleFirmByRefTrxId(String refTrxId) {
+		super.setTable("PG_CHARGE_SETTLE_FIRM_RESERVE");
+		super.addWhere("refTrxId", refTrxId);
+		super.addWhere("status", "대기");
+
+		boolean deleted = super.delete();
+		super.initRecord();
+		logger.info("set PG_CHARGE_SETTLE_FIRM_RESERVE delete : [{}][{}]", refTrxId, deleted);
 
 		return deleted;
 	}

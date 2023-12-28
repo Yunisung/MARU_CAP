@@ -719,7 +719,7 @@ public class Capture {
 						logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 재정렬 데이터 추출 size: {}", rset.getRows().size());
 						// 동일 이체예정일 예약이체건 모두 가져와 리스트 추가 후 데이터 삭제
 						for (SharedMap<String, Object> childFirmMap : rset.getRows()) {
-							logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 재정렬 데이터 추출 trxId: {}", childFirmMap.getString("refTrxId"));
+							logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 재정렬 데이터 추출 trxId: {}", childFirmMap.getString("trxId"));
 							insertChargeSettleFirmPartList.add(childFirmMap);
 							trxDAO.deleteChargeSettleFirm(childFirmMap.getString("trxId"));
 						}
@@ -1139,11 +1139,11 @@ public class Capture {
 
 			if(!"분납".equals(rootCapMap.getString("billingMethod"))) {
 				// 원거래 예약이체 대기 건 삭제
-				trxDAO.deleteChargeSettleFirm(rootCapMap.getString("trxId"));
+				trxDAO.deleteChargeSettleFirmByRefTrxId(rootCapMap.getString("trxId"));
 			} else {
 				// 분납 취소되면 삭제 후 재구성
 				String rootTrxId = trxDAO.getChargeSettleFirm(rootCapMap.getString("trxId")).getString("rootTrxId");
-				logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 분납 trxId : {}", rootTrxId);
+				logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 분납 rootTrxId : {}", rootTrxId);
 				RecordSet rset = trxDAO.getChargeSettleFirmChildList(rootTrxId);
 				if(rset.getRows().size() > 0) {
 					logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 재정렬 데이터 추출 size: {}", rset.getRows().size());
