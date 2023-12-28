@@ -1383,10 +1383,10 @@ public class TrxDAO extends DAO {
 		return rset;
 	}
 
-	public SharedMap<String, Object> getChargeSettleFirm(String trxId){
+	public SharedMap<String, Object> getChargeSettleFirm(String refTrxId){
 		super.setTable("PG_CHARGE_SETTLE_FIRM_RESERVE");
 		super.setColumns("*");
-		super.addWhere("trxId", trxId, eq);
+		super.addWhere("refTrxId", refTrxId, eq);
 		super.addWhere("status", "대기");
 		RecordSet rset = super.search();
 		super.initRecord();
