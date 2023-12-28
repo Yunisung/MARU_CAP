@@ -716,11 +716,14 @@ public class Capture {
 					String transferDay = calcTransferDay(mchtRentMap.getString("transferDay"));
 					RecordSet rset = trxDAO.getChargeSettleFirmChildList(trxCapMap.getString("mchtId"), transferDay);
 					if(rset.getRows().size() > 0) {
+						logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 재정렬 데이터 추출 size: {}", rset.getRows().size());
 						// 동일 이체예정일 예약이체건 모두 가져와 리스트 추가 후 데이터 삭제
 						for (SharedMap<String, Object> childFirmMap : rset.getRows()) {
+							logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 재정렬 데이터 추출 trxId: {}", childFirmMap.getString("refTrxId"));
 							insertChargeSettleFirmPartList.add(childFirmMap);
 							trxDAO.deleteChargeSettleFirm(childFirmMap.getString("trxId"));
 						}
+						logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 분납 원거래건 삭제");
 						// 집합건(원거래건) 삭제
 						String rootTrxId = rset.getRowFirst().getString("rootTrxId");
 						trxDAO.deleteChargeSettleFirm(rootTrxId);
@@ -1140,16 +1143,20 @@ public class Capture {
 			} else {
 				// 분납 취소되면 삭제 후 재구성
 				String rootTrxId = trxDAO.getChargeSettleFirm(rootCapMap.getString("trxId")).getString("rootTrxId");
+				logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 분납 trxId : {}", rootTrxId);
 				RecordSet rset = trxDAO.getChargeSettleFirmChildList(rootTrxId);
 				if(rset.getRows().size() > 0) {
+					logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 재정렬 데이터 추출 size: {}", rset.getRows().size());
 					// 동일 이체예정일 예약이체건 모두 가져와 리스트 추가 후 데이터 삭제
 					for (SharedMap<String, Object> childFirmMap : rset.getRows()) {
-						if(!childFirmMap.getString("trxId").equals(rootCapMap.getString("trxId"))) {
+						if(!childFirmMap.getString("refTrxId").equals(rootCapMap.getString("trxId"))) {
+							logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 재정렬 데이터 추출 trxId: {}", childFirmMap.getString("refTrxId"));
 							insertChargeSettleFirmPartList.add(childFirmMap);
 						}
 					}
 				}
 				if(!CommonUtil.isNullOrSpace(rootTrxId)) {
+					logger.info("PG_CHARGE_SETTLE_FIRM_RESERVE 분납 원거래건 삭제");
 					// 분납 하위건 삭제
 					if (trxDAO.deleteChargeSettleFirmByRootTrxId(rootTrxId)) {
 						// 집합건(원거래건) 삭제
