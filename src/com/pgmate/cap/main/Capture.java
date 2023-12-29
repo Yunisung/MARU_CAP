@@ -73,6 +73,7 @@ public class Capture {
 			logger.info("capture sub inserted : {}",trxBatchDAO.insertTrxCapSub(insertCapSubList));
 			logger.info("capture charge inserted : {}",trxBatchDAO.insertChargeSettle(insertChargeSettleList));
 			logger.info("capture charge firm inserted : {}",trxBatchDAO.insertChargeSettleFirm(insertChargeSettleFirmList));
+			logger.info("capture charge firm history inserted : {}",trxBatchDAO.insertChargeSettleFirmHistory(insertChargeSettleFirmList));
 			logger.info("");
 		}
 		
@@ -102,6 +103,7 @@ public class Capture {
 			logger.info("refund sub inserted : {}",trxBatchDAO.insertTrxCapSub(insertCapSubList));
 			logger.info("refund charge inserted : {}",trxBatchDAO.insertChargeSettle(insertChargeSettleList));
 			logger.info("refund charge firm inserted : {}",trxBatchDAO.insertChargeSettleFirm(insertChargeSettleFirmList));
+			logger.info("refund charge firm history inserted : {}",trxBatchDAO.insertChargeSettleFirmHistory(insertChargeSettleFirmList));
 		}
 		
 		if(warningList.size() > 0){

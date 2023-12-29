@@ -312,7 +312,7 @@ public class TrxBatchDAO  {
 
 	public int insertChargeSettleFirm(List<SharedMap<String,Object>> insertChargeSettleFirmList){
 		int inserted = 0;
-		logger.debug("insert chargeSettle batch : {}",insertChargeSettleFirmList.size());
+		logger.debug("insert chargeSettleFirm batch : {}",insertChargeSettleFirmList.size());
 		String query = "insert into PG_CHARGE_SETTLE_FIRM_RESERVE (trxId, trxType, transferType, mchtId, trackId, pubDay, pubTime, status, retry, trxDay, trxTime, amount, fee, feeVat, bankFee, netAmount, balance, resultCd, resultMsg, refId, refTrxId, rootTrxId, account, bankCd, bankName, holder, recordInfo, regId, regDay)  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		DBManager db = null ;
@@ -368,7 +368,74 @@ public class TrxBatchDAO  {
 			inserted +=pstmt.executeBatch().length;
 			conn.commit();
 		}catch(Exception e){
-			logger.debug("insert batch chargeSettle error : {}",CommonUtil.getExceptionMessage(e));
+			logger.debug("insert batch chargeSettleFirm error : {}",CommonUtil.getExceptionMessage(e));
+		}finally{
+			db.close(pstmt);
+			db.close(conn);
+		}
+
+		return inserted;
+	}
+
+	public int insertChargeSettleFirmHistory(List<SharedMap<String,Object>> insertChargeSettleFirmList){
+		int inserted = 0;
+		logger.debug("insert chargeSettleFirm history batch : {}",insertChargeSettleFirmList.size());
+		String query = "insert into HT_CHARGE_SETTLE_FIRM_RESERVE (trxId, trxType, transferType, mchtId, trackId, pubDay, pubTime, status, retry, trxDay, trxTime, amount, fee, feeVat, bankFee, netAmount, balance, resultCd, resultMsg, refId, refTrxId, rootTrxId, account, bankCd, bankName, holder, recordInfo, regId, regDay)  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+		DBManager db = null ;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+
+		try{
+			db 		= DBFactory.getInstance();
+			conn	= db.getConnection();
+			pstmt	= conn.prepareStatement(query);
+
+			int batchSize = 100;
+			int count = 0;
+
+			for(SharedMap<String,Object> map : insertChargeSettleFirmList){
+				int i=1;
+				pstmt.setString(i++, map.getString("trxId"));
+				pstmt.setString(i++, map.getString("trxType"));
+				pstmt.setString(i++, map.getString("transferType"));
+				pstmt.setString(i++, map.getString("mchtId"));
+				pstmt.setString(i++, map.getString("trackId"));
+				pstmt.setString(i++, map.getString("pubDay"));
+				pstmt.setString(i++, map.getString("pubTime"));
+				pstmt.setString(i++, map.getString("status"));
+				pstmt.setInt(i++   , map.getInt("retry"));
+				pstmt.setString(i++, map.getString("trxDay"));
+				pstmt.setString(i++, map.getString("trxTime"));
+				pstmt.setLong(i++  , map.getLong("amount"));
+				pstmt.setLong(i++  , map.getLong("fee"));
+				pstmt.setLong(i++  , map.getLong("feeVat"));
+				pstmt.setLong(i++  , map.getLong("bankFee"));
+				pstmt.setLong(i++  , map.getLong("netAmount"));
+				pstmt.setLong(i++  , map.getLong("balance"));
+				pstmt.setString(i++, map.getString("resultCd"));
+				pstmt.setString(i++, map.getString("resultMsg"));
+				pstmt.setString(i++, map.getString("refId"));
+				pstmt.setString(i++, map.getString("refTrxId"));
+				pstmt.setString(i++, map.getString("rootTrxId"));
+				pstmt.setString(i++, map.getString("account"));
+				pstmt.setString(i++, map.getString("bankCd"));
+				pstmt.setString(i++, map.getString("bankName"));
+				pstmt.setString(i++, map.getString("holder"));
+				pstmt.setString(i++, map.getString("recordInfo"));
+				pstmt.setString(i++, map.getString("regId"));
+				pstmt.setString(i++, map.getString("regDay"));
+				pstmt.addBatch();
+
+				if(++count % batchSize == 0) {
+					inserted += pstmt.executeBatch().length;
+				}
+			}
+
+			inserted +=pstmt.executeBatch().length;
+			conn.commit();
+		}catch(Exception e){
+			logger.debug("insert batch chargeSettleFirm history error : {}",CommonUtil.getExceptionMessage(e));
 		}finally{
 			db.close(pstmt);
 			db.close(conn);
