@@ -173,8 +173,8 @@ public class Capture {
 					sumFeeMap.put("pubTime", RENT_PUB_TIME);
 					sumFeeMap.put("status", "대기");
 					sumFeeMap.put("retry", 0);
-					sumFeeMap.put("trxDay", regDate.substring(0, 8));
-					sumFeeMap.put("trxTime", regDate.substring(8));
+					sumFeeMap.put("trxDay", "");
+					sumFeeMap.put("trxTime", "");
 					sumFeeMap.put("bankFee", 0);
 					sumFeeMap.put("balance", balance);
 					sumFeeMap.put("resultCd", "");
@@ -852,8 +852,8 @@ public class Capture {
 		chargeSettleFirmMap.put("pubTime"	, RENT_PUB_TIME);
 		chargeSettleFirmMap.put("status"	, "대기");
 		chargeSettleFirmMap.put("retry"		, 0);
-		chargeSettleFirmMap.put("trxDay"	, regDate.substring(0, 8));
-		chargeSettleFirmMap.put("trxTime"	, regDate.substring(8));
+		chargeSettleFirmMap.put("trxDay"	, "");
+		chargeSettleFirmMap.put("trxTime"	, "");
 		chargeSettleFirmMap.put("amount"	, Math.abs(amount));
 		chargeSettleFirmMap.put("fee"		, Math.abs(capDtlMap.getLong("stlFee")));
 		chargeSettleFirmMap.put("feeVat"	, Math.abs(capDtlMap.getLong("stlFeeVat")));
