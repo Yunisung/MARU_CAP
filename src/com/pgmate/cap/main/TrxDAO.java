@@ -1340,6 +1340,7 @@ public class TrxDAO extends DAO {
 	public boolean deleteChargeSettleFirmByRootTrxId(String rootTrxId) {
 		super.setTable("PG_CHARGE_SETTLE_FIRM_RESERVE");
 		super.addWhere("rootTrxId", rootTrxId);
+		super.addWhere("rootTrxId","",ne);
 		super.addWhere("status", "대기");
 
 		boolean deleted = super.delete();
