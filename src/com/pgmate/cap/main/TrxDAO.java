@@ -1377,6 +1377,7 @@ public class TrxDAO extends DAO {
 		super.setTable("PG_CHARGE_SETTLE_FIRM_RESERVE");
 		super.setColumns("*");
 		super.addWhere("rootTrxId",rootTrxId,eq);
+		super.addWhere("rootTrxId","",ne);
 		super.addWhere("status", "대기");
 		RecordSet rset = super.search();
 		super.initRecord();
