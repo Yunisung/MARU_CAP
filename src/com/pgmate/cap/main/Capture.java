@@ -981,21 +981,45 @@ public class Capture {
 		}
 		
 		capDtlMap.put("stlRate"		, rootCapMap.getDouble("stlRate"));	
-		
-		if(trxRfdMap.isEquals("vanId", "OFFLINE")){
-			double normalRate 	= rootCapMap.getDouble("stlRate")-rootCapMap.getDouble("stlLoanRate");				//선정산 수수료 제외
-			long normalFee 		= calcFee(trxCapMap.getLong("amount"), normalRate);									//가맹점 수수료 산출
-			long loanFee   		= calcFee(trxCapMap.getLong("amount"), rootCapMap.getDouble("stlLoanRate"));		//선정산 수수료 산출
-			long loanFeeVat		= calcVat(loanFee);																	//선정산 VAT 산출
-			capDtlMap.put("stlFee"		, normalFee+loanFee);
-			capDtlMap.put("stlFeeVat"	, loanFeeVat);
-		}else{
+
+		if(isRentApp) {
+
+			String contractType = rootCapMap.getString("contractType");
+			String chargeTarget = rootCapMap.getString("chargeTarget");
+
+			if ("임차인".equals(contractType) || ("임대인".equals(contractType) && "임차인".equals(chargeTarget))) {
+				//임차일경우 이거나 임대인이지만 부과대상이 임차인이라면
+				// 정산금액 = 거래금액 * ((1000/ (1000 + 36))
+				long rentStlAmount = calcRentStlAmount(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlRate"));
+				capDtlMap.put("stlFee", calcFee(rentStlAmount, capDtlMap.getDouble("stlRate")));
+				capDtlMap.put("stlFeeVat", calcVat(capDtlMap.getLong("stlFee")));
+				capDtlMap.put("stlAmount", rentStlAmount);
+			} else {
+				// 임대인일 경우
+				capDtlMap.put("stlFee", calcFee(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlRate")));
+				capDtlMap.put("stlFeeVat", calcVat(capDtlMap.getLong("stlFee")));
+				capDtlMap.put("stlAmount", trxCapMap.getLong("amount") - capDtlMap.getLong("stlFee") - capDtlMap.getLong("stlFeeVat"));
+			}
+
 			capDtlMap.put("stlFee"		, calcFee(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlRate")));
 			capDtlMap.put("stlFeeVat"	, calcVat(capDtlMap.getLong("stlFee")));
-			
+
+		} else {
+			if(trxRfdMap.isEquals("vanId", "OFFLINE")){
+				double normalRate 	= rootCapMap.getDouble("stlRate")-rootCapMap.getDouble("stlLoanRate");				//선정산 수수료 제외
+				long normalFee 		= calcFee(trxCapMap.getLong("amount"), normalRate);									//가맹점 수수료 산출
+				long loanFee   		= calcFee(trxCapMap.getLong("amount"), rootCapMap.getDouble("stlLoanRate"));		//선정산 수수료 산출
+				long loanFeeVat		= calcVat(loanFee);																	//선정산 VAT 산출
+				capDtlMap.put("stlFee"		, normalFee+loanFee);
+				capDtlMap.put("stlFeeVat"	, loanFeeVat);
+			}else{
+				capDtlMap.put("stlFee"		, calcFee(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlRate")));
+				capDtlMap.put("stlFeeVat"	, calcVat(capDtlMap.getLong("stlFee")));
+
+			}
+			capDtlMap.put("stlAmount"	, trxCapMap.getLong("amount")-capDtlMap.getLong("stlFee")-capDtlMap.getLong("stlFeeVat"));
 		}
-		
-		capDtlMap.put("stlAmount"	, trxCapMap.getLong("amount")-capDtlMap.getLong("stlFee")-capDtlMap.getLong("stlFeeVat"));
+
 		capDtlMap.put("stlType"		, rootCapMap.getString("stlType"));
 		capDtlMap.put("stlDay"		, calcDay(capDtlMap.getString("stlType"), trxCapMap.getString("trxDay")));
 		capDtlMap.put("stlId"		, "");
@@ -1588,7 +1612,12 @@ public class Capture {
 		//logger.info("계산결과: {}", amount * calRate);
 //		return new Double(amount * calRate).longValue();
 //		return new Double(Math.round(amount * calRate)).longValue();
-		return new Double(Math.ceil(amount * calRate)).longValue();
+//		return new Double(Math.ceil(amount * calRate)).longValue();
+		if(amount > 0) {
+			return new Double(Math.ceil(amount * calRate)).longValue();
+		} else {
+			return new Double(Math.floor(amount * calRate)).longValue();
+		}
 	}
 	
 	
