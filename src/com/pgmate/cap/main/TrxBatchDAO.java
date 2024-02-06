@@ -380,7 +380,7 @@ public class TrxBatchDAO  {
 	public int insertChargeSettleFirmHistory(List<SharedMap<String,Object>> insertChargeSettleFirmList){
 		int inserted = 0;
 		logger.debug("insert chargeSettleFirm history batch : {}",insertChargeSettleFirmList.size());
-		String query = "insert into HT_CHARGE_SETTLE_FIRM_RESERVE (trxId, trxType, transferType, mchtId, trackId, pubDay, pubTime, status, retry, trxDay, trxTime, amount, fee, feeVat, bankFee, netAmount, balance, resultCd, resultMsg, refId, refTrxId, rootTrxId, account, bankCd, bankName, holder, recordInfo, regId, regDay)  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+		String query = "insert into HT_CHARGE_SETTLE_FIRM_RESERVE (trxId, trxType, transferType, mchtId, trackId, pubDay, pubTime, status, retry, trxDay, trxTime, amount, fee, feeVat, bankFee, netAmount, balance, resultCd, resultMsg, refId, refTrxId, rootTrxId, account, bankCd, bankName, holder, recordInfo, regId, regDay, summary)  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		DBManager db = null ;
 		Connection conn = null;
@@ -425,6 +425,7 @@ public class TrxBatchDAO  {
 				pstmt.setString(i++, map.getString("recordInfo"));
 				pstmt.setString(i++, map.getString("regId"));
 				pstmt.setString(i++, map.getString("regDay"));
+				pstmt.setString(i++, "매입건 생성");
 				pstmt.addBatch();
 
 				if(++count % batchSize == 0) {
