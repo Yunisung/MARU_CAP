@@ -42,7 +42,7 @@ public class Capture {
 	private List<String> warningList = new ArrayList<String>();
 	private List<String[]> riskList  = new ArrayList<String[]>();
 
-	private static final String RENT_PUB_TIME = "004000";
+	private static final String RENT_PUB_TIME = "130000";
 	
 	
 	public Capture() {
