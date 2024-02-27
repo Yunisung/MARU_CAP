@@ -439,6 +439,8 @@ public class Capture {
 					capDtlMap.put("stlFeeVat", calcVat(capDtlMap.getLong("stlFee")));
 					capDtlMap.put("stlAmount", trxCapMap.getLong("amount") - capDtlMap.getLong("stlFee") - capDtlMap.getLong("stlFeeVat"));
 				}
+				logger.info("월세앱 가맹점 정산 capId :{}, billingType: {}, contractType: {}, stlAmount: {}, stlRate: {}, stlFee: {}",
+						trxCapMap.getString("capId"), billingType, contractType, capDtlMap.getLong("stlAmount"), capDtlMap.getDouble("stlRate"), capDtlMap.getLong("stlFee"));
 
 			} else {
 				if (mchtMngMap.getString("settleType").equals("D+1") && capDtlMap.isNullOrSpace("risk")) {    //D+1 정산 주기에 RISK가 없는 경우는 선지급 수수료를 청구한다.
@@ -492,6 +494,8 @@ public class Capture {
 				capDtlMap.put("stlDistDay", calcDay(distMngMap.getString("settleType"), trxCapMap.getString("trxDay")));
 				capDtlMap.put("stlDistId", "");
 			}
+			logger.info("월세앱 영업라인정산 capId :{}, billingType: {}, stlDistRate: {}, stlDistFee: {}",
+					trxCapMap.getString("capId"), billingType, capDtlMap.getDouble("stlDistRate"), capDtlMap.getLong("stlDistFee"));
 
 		} else {
 			if (agencyMngMap.size() > 0) {
