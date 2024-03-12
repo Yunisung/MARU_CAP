@@ -347,6 +347,9 @@ public class Capture {
 		//capDtlMap.put("transferDay", trxRentMap.getString("transferDay"));
 		capDtlMap.put("billingMethod", trxRentMap.getString("billingMethod"));
 		capDtlMap.put("billingType", trxRentMap.getString("billingType"));
+		capDtlMap.put("contractType", mchtRentMap.getString("contractType"));
+		capDtlMap.put("chargeTarget", mchtRentMap.getString("chargeTarget"));
+
 
 
 		if (!capDtlMap.isNullOrSpace("risk")) {
@@ -1127,6 +1130,8 @@ public class Capture {
 		//capDtlMap.put("transferDay", rootCapMap.getString("transferDay"));
 		capDtlMap.put("billingMethod", rootCapMap.getString("billingMethod"));
 		capDtlMap.put("billingType", rootCapMap.getString("billingType"));
+		capDtlMap.put("contractType", rootCapMap.getString("contractType"));
+		capDtlMap.put("chargeTarget", rootCapMap.getString("chargeTarget"));
 
 
 		

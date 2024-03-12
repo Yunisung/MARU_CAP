@@ -94,7 +94,8 @@ public class TrxBatchDAO  {
 		int inserted = 0;
 		logger.debug("insert trxCapDtl batch : {}",insertCapDtlList.size());
 		String query = "insert into PG_TRX_CAP_DTL (capId,stlStatus,stlAmount,stlRate,stlInterFee,stlInterFeeVat,stlInterRate,stlLoanRate,stlFee,stlFeeVat,stlType,stlDay,payOutDay,stlId,stlDistFee,stlDistRate,stlDiffDistFee,stlDiffDistRate,stlDistDay,stlDistId,stlAgencyFee,stlAgencyRate,stlDiffAgencyFee,stlDiffAgencyRate,stlAgencyDay, "
-				+"stlAgencyId,stlSalesFee,stlSalesRate,stlDiffSalesFee,stlDiffSalesRate,stlSalesDay,stlSalesId,van,vanId,vanTrxId,vanStatus,stlVanFee,stlVanRate,stlVanInterFee,stlVanInterRate,stlVanDay,stlDiffType,stlDiffStatus,stlDiffRate,stlDiffAmt,stlDiffVanType,stlDiffVanDay,stlDiffVanAmt,stlDiffResultMsg,benefit,taxId,risk,billingMethod,billingType)  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				+"stlAgencyId,stlSalesFee,stlSalesRate,stlDiffSalesFee,stlDiffSalesRate,stlSalesDay,stlSalesId,van,vanId,vanTrxId,vanStatus,stlVanFee,stlVanRate,stlVanInterFee,stlVanInterRate,stlVanDay,stlDiffType,stlDiffStatus,stlDiffRate,stlDiffAmt,stlDiffVanType,stlDiffVanDay,stlDiffVanAmt,stlDiffResultMsg,benefit,taxId,risk, "
+				+ "billingMethod,billingType,contractType,chargeTarget)  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 						
 		
 		DBManager db = null ;
@@ -165,6 +166,8 @@ public class TrxBatchDAO  {
 				pstmt.setString(i++, map.getString("risk"));
 				pstmt.setString(i++, map.getString("billingMethod"));
 				pstmt.setString(i++, map.getString("billingType"));
+				pstmt.setString(i++, map.getString("contractType"));
+				pstmt.setString(i++, map.getString("chargeTarget"));
 				pstmt.addBatch();
 				if(++count % batchSize == 0) {
 					inserted += pstmt.executeBatch().length;
