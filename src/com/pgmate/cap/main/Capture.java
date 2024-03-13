@@ -349,6 +349,7 @@ public class Capture {
 		capDtlMap.put("billingType", trxRentMap.getString("billingType"));
 		capDtlMap.put("contractType", mchtRentMap.getString("contractType"));
 		capDtlMap.put("chargeTarget", mchtRentMap.getString("chargeTarget"));
+		logger.info("rent app parameter : {},{},{},{}",capDtlMap.getString("billingMethod"),capDtlMap.getString("billingType"),capDtlMap.getString("contractType"),capDtlMap.getString("chargeTarget"));
 
 
 
@@ -1133,6 +1134,7 @@ public class Capture {
 		capDtlMap.put("contractType", rootCapMap.getString("contractType"));
 		capDtlMap.put("chargeTarget", rootCapMap.getString("chargeTarget"));
 
+		logger.info("rent app parameter : {},{},{},{}",capDtlMap.getString("billingMethod"),capDtlMap.getString("billingType"),capDtlMap.getString("contractType"),capDtlMap.getString("chargeTarget"));
 
 		
 		insertCapDtlList.add(capDtlMap);
