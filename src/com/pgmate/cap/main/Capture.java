@@ -349,7 +349,10 @@ public class Capture {
 		capDtlMap.put("billingType", trxRentMap.getString("billingType"));
 		capDtlMap.put("contractType", mchtRentMap.getString("contractType"));
 		capDtlMap.put("chargeTarget", mchtRentMap.getString("chargeTarget"));
-		logger.info("rent app parameter : {},{},{},{}",capDtlMap.getString("billingMethod"),capDtlMap.getString("billingType"),capDtlMap.getString("contractType"),capDtlMap.getString("chargeTarget"));
+
+		if(isRentApp) {
+			logger.info("rent app parameter : {},{},{},{}", capDtlMap.getString("billingMethod"), capDtlMap.getString("billingType"), capDtlMap.getString("contractType"), capDtlMap.getString("chargeTarget"));
+		}
 
 
 
@@ -994,6 +997,7 @@ public class Capture {
 
 		if(isRentApp) {
 
+			String billingType = rootCapMap.getString("billingType");
 			String contractType = rootCapMap.getString("contractType");
 			String chargeTarget = rootCapMap.getString("chargeTarget");
 
@@ -1011,8 +1015,8 @@ public class Capture {
 				capDtlMap.put("stlAmount", trxCapMap.getLong("amount") - capDtlMap.getLong("stlFee") - capDtlMap.getLong("stlFeeVat"));
 			}
 
-			capDtlMap.put("stlFee"		, calcFee(trxCapMap.getLong("amount"), capDtlMap.getDouble("stlRate")));
-			capDtlMap.put("stlFeeVat"	, calcVat(capDtlMap.getLong("stlFee")));
+			logger.info("월세앱 가맹점 refund 정산 capId :{}, billingType: {}, contractType: {}, stlAmount: {}, stlRate: {}, stlFee: {}",
+					trxCapMap.getString("capId"), billingType, contractType, capDtlMap.getLong("stlAmount"), capDtlMap.getDouble("stlRate"), capDtlMap.getLong("stlFee"));
 
 		} else {
 			if(trxRfdMap.isEquals("vanId", "OFFLINE")){
@@ -1134,7 +1138,9 @@ public class Capture {
 		capDtlMap.put("contractType", rootCapMap.getString("contractType"));
 		capDtlMap.put("chargeTarget", rootCapMap.getString("chargeTarget"));
 
-		logger.info("rent app parameter : {},{},{},{}",capDtlMap.getString("billingMethod"),capDtlMap.getString("billingType"),capDtlMap.getString("contractType"),capDtlMap.getString("chargeTarget"));
+		if(isRentApp) {
+			logger.info("rent app parameter : {},{},{},{}", capDtlMap.getString("billingMethod"), capDtlMap.getString("billingType"), capDtlMap.getString("contractType"), capDtlMap.getString("chargeTarget"));
+		}
 
 		
 		insertCapDtlList.add(capDtlMap);
