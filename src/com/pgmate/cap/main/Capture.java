@@ -773,7 +773,7 @@ public class Capture {
 		}
 	}
 
-	private String calcTransferDay(String transferDay) {
+	/*private String calcTransferDay(String transferDay) {
 		String curYearMonth = CommonUtil.getCurrentDate("yyyyMM");
 		long curDay = CommonUtil.parseLong(CommonUtil.getCurrentDate("dd"));
 
@@ -784,6 +784,31 @@ public class Capture {
 			String nextMonth = CommonUtil.getOpDate(GregorianCalendar.MONTH,1,today).substring(0,6);
 			return nextMonth + transferDay;
 		}
+	}*/
+
+	public String calcTransferDay(String transferDay) {
+		String curYearMonth = CommonUtil.getCurrentDate("yyyyMM");
+		long curDay = CommonUtil.parseLong(CommonUtil.getCurrentDate("dd"));
+
+		// 이체 예정일 지난 후 펌 들어갈 때
+		// 이체 에정일 다음날로 설정
+		if(CommonUtil.parseLong(transferDay) <= curDay) {
+			transferDay = String.valueOf(curDay + 1);
+		}
+
+		return setPubDay(curYearMonth, transferDay);
+	}
+
+	public String setPubDay(String curYearMonth, String transferDay) {
+		// 마지막날 계산
+		LocalDate localDate = LocalDate.parse(curYearMonth + "01", DateTimeFormatter.ofPattern("yyyyMMdd"));
+		if((Integer.parseInt(transferDay) > localDate.lengthOfMonth())){
+			localDate = localDate.withDayOfMonth(localDate.lengthOfMonth());
+		} else {
+			localDate = localDate.withDayOfMonth(Integer.parseInt(transferDay));
+		}
+
+		return localDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 	}
 
 	private SharedMap<String,Object> createNtsMap(SharedMap<String,Object> trxCapMap, SharedMap<String,Object> capDtlMap) {
