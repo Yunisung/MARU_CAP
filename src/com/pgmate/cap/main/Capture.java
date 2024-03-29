@@ -1115,7 +1115,9 @@ public class Capture {
 			}
 			// 영중소 가맹점 수수료 추가
 			//PYS : 부국위너스 영중소 VANID로 변경 2010000007, 2010000008
-			if(!rootCapMap.getString("stlDiffType").equals("일반") && capDtlMap.getString("van").startsWith("KSPAY") && (trxRfdMap.isEquals("vanId", "2010000007") || trxRfdMap.isEquals("vanId", "2010000008"))) {
+			if(!rootCapMap.getString("stlDiffType").equals("일반") &&
+					(capDtlMap.getString("van").startsWith("KSPAY") && (trxRfdMap.isEquals("vanId", "2010000001") || trxRfdMap.isEquals("vanId", "2010000007") || trxRfdMap.isEquals("vanId", "2010000008") || trxRfdMap.isEquals("vanId", "2010000010") || trxRfdMap.isEquals("vanId", "2010000011")|| trxRfdMap.isEquals("vanId", "2010000013"))) ||
+					(capDtlMap.getString("van").startsWith("GALAXIA") && (trxRfdMap.isEquals("vanId", "M2245697") || trxRfdMap.isEquals("vanId", "M2253623") || trxRfdMap.isEquals("vanId", "M2253625") || trxRfdMap.isEquals("vanId", "M2245701") || trxRfdMap.isEquals("vanId", "M2370705") || trxRfdMap.isEquals("vanId", "M2373147") || trxRfdMap.isEquals("vanId", "M2476183")))) {
 
 				long stlDiffAgencyFee = calcFeeVat(trxCapMap.getLong("amount"), rootCapMap.getDouble("stlDiffAgencyRate"));
 				long stlDiffDistFee = calcFeeVat(trxCapMap.getLong("amount"), rootCapMap.getDouble("stlDiffDistRate"));
