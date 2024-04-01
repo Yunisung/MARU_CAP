@@ -786,17 +786,39 @@ public class Capture {
 		}
 	}*/
 
-	public String calcTransferDay(String transferDay) {
-		String curYearMonth = CommonUtil.getCurrentDate("yyyyMM");
+	public String calcTransferDay(String transferDayStr) {
+		int transferDay = Integer.parseInt(transferDayStr);
+
 		long curDay = CommonUtil.parseLong(CommonUtil.getCurrentDate("dd"));
 
-		// 이체 예정일 지난 후 펌 들어갈 때
-		// 이체 에정일 다음날로 설정
-		if(CommonUtil.parseLong(transferDay) <= curDay) {
-			transferDay = String.valueOf(curDay + 1);
+		LocalDate localDate = LocalDate.now();
+
+		String pubDay = "";
+
+		// 당월의 마지막 날 저장
+		// 이체예정일 > 말일 일 때 이체예정일 = 말일 설정
+		int lastDay = localDate.lengthOfMonth();
+		if(transferDay > lastDay) {
+			transferDay = lastDay;
 		}
 
-		return setPubDay(curYearMonth, transferDay);
+		// 이체 예정일 지난 후 펌 들어갈 때
+		// 이체 에정일 = 결제일 D+1
+		if(CommonUtil.parseLong(transferDay) <= curDay) {
+//            transferDay = String.valueOf(curDay + 1);
+			pubDay = localDate.plusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+		} else {
+			// 결제일 <= 말일
+			// 이체예정일 = 결제일 D+1
+			if(lastDay <= curDay) {
+				pubDay = localDate.plusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+			} else {
+				localDate = LocalDate.parse(CommonUtil.getCurrentDate("yyyyMM") + CommonUtil.zerofill(transferDay, 2), DateTimeFormatter.ofPattern("yyyyMMdd"));
+				pubDay = localDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+			}
+		}
+
+		return pubDay;
 	}
 
 	public String setPubDay(String curYearMonth, String transferDay) {
