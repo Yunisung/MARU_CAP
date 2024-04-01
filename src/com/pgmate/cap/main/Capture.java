@@ -580,8 +580,8 @@ public class Capture {
 			// 영중소 가맹점 수수료 추가 
 			//PYS : 부국위너스 영중소 VANID로 변경 2010000007, 2010000008
 			if (!mchtMngMap.getString("diffType").equals("일반") &&
-					(capDtlMap.getString("van").startsWith("KSPAY") && (trxPayMap.isEquals("vanId", "2010000001") || trxPayMap.isEquals("vanId", "2010000007") || trxPayMap.isEquals("vanId", "2010000008") || trxPayMap.isEquals("vanId", "2010000010") || trxPayMap.isEquals("vanId", "2010000011")|| trxPayMap.isEquals("vanId", "2010000013"))) ||
-					(capDtlMap.getString("van").startsWith("GALAXIA") && (trxPayMap.isEquals("vanId", "M2245697") || trxPayMap.isEquals("vanId", "M2253623") || trxPayMap.isEquals("vanId", "M2253625") || trxPayMap.isEquals("vanId", "M2245701") || trxPayMap.isEquals("vanId", "M2370705") || trxPayMap.isEquals("vanId", "M2373147") || trxPayMap.isEquals("vanId", "M2476183")))) {
+					(capDtlMap.getString("van").startsWith("KSPAY") && (trxPayMap.isEquals("vanId", "2010000007"))) ||
+					(capDtlMap.getString("van").startsWith("GALAXIA") && (trxPayMap.isEquals("vanId", "M2373543") || trxPayMap.isEquals("vanId", "M2476183")))) {
 				double diffRate = 0;
 				double stlDiffAgencyRate = 0;
 				double stlDiffDistRate = 0;
@@ -1138,8 +1138,8 @@ public class Capture {
 			// 영중소 가맹점 수수료 추가
 			//PYS : 부국위너스 영중소 VANID로 변경 2010000007, 2010000008
 			if(!rootCapMap.getString("stlDiffType").equals("일반") &&
-					(capDtlMap.getString("van").startsWith("KSPAY") && (trxRfdMap.isEquals("vanId", "2010000001") || trxRfdMap.isEquals("vanId", "2010000007") || trxRfdMap.isEquals("vanId", "2010000008") || trxRfdMap.isEquals("vanId", "2010000010") || trxRfdMap.isEquals("vanId", "2010000011")|| trxRfdMap.isEquals("vanId", "2010000013"))) ||
-					(capDtlMap.getString("van").startsWith("GALAXIA") && (trxRfdMap.isEquals("vanId", "M2245697") || trxRfdMap.isEquals("vanId", "M2253623") || trxRfdMap.isEquals("vanId", "M2253625") || trxRfdMap.isEquals("vanId", "M2245701") || trxRfdMap.isEquals("vanId", "M2370705") || trxRfdMap.isEquals("vanId", "M2373147") || trxRfdMap.isEquals("vanId", "M2476183")))) {
+					(capDtlMap.getString("van").startsWith("KSPAY") && (trxRfdMap.isEquals("vanId", "2010000007"))) ||
+					(capDtlMap.getString("van").startsWith("GALAXIA") && (trxRfdMap.isEquals("vanId", "M2373543") || trxRfdMap.isEquals("vanId", "M2476183")))) {
 
 				long stlDiffAgencyFee = calcFeeVat(trxCapMap.getLong("amount"), rootCapMap.getDouble("stlDiffAgencyRate"));
 				long stlDiffDistFee = calcFeeVat(trxCapMap.getLong("amount"), rootCapMap.getDouble("stlDiffDistRate"));
