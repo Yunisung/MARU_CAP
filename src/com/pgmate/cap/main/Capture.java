@@ -1136,7 +1136,8 @@ public class Capture {
 				}
 			}
 			// 영중소 가맹점 수수료 추가
-			//PYS : 부국위너스 영중소 VANID로 변경 2010000007, 2010000008
+			// 영업라인 영중소 차액정산 적용하는 vanId
+			// 이 외에 vanId는 카드사 차액정산 받지만 따로 정산 안해줌
 			if(!rootCapMap.getString("stlDiffType").equals("일반") &&
 					(capDtlMap.getString("van").startsWith("KSPAY") && (trxRfdMap.isEquals("vanId", "2010000007"))) ||
 					(capDtlMap.getString("van").startsWith("GALAXIA") && (trxRfdMap.isEquals("vanId", "M2373543") || trxRfdMap.isEquals("vanId", "M2476183")))) {
