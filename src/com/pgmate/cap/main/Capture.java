@@ -819,7 +819,7 @@ public class Capture {
 			// 이체예정일 = 익월의 이체예정일
 			if(transferDay <= lastDay) {
 				nextMonth = CommonUtil.getOpDate(GregorianCalendar.MONTH,1,CommonUtil.getCurrentDate("yyyyMMdd")).substring(0,6);
-				pubDay = nextMonth + transferDay;
+				pubDay = nextMonth + CommonUtil.zerofill(transferDay, 2);
 			}
 			// 이체예정일 > 당월 말일30
 			// 이체예정일 = 익월의 말일
