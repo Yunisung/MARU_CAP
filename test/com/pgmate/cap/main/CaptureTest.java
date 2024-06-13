@@ -144,6 +144,7 @@ public class CaptureTest {
         List<SharedMap<String, Object>> capList = trxDAO.getCapList();
 
         logger.info("capListSize : {}", capList.size());
+        int count = 0;
         for (SharedMap<String, Object> map : capList) {
             logger.info("capId : {}", map.getString("capId"));
             SharedMap<String, Object> orgFeeMap = trxDAO.getOrgFee(map.getString("van"));
@@ -167,8 +168,9 @@ public class CaptureTest {
             capDtlMap.put("stlDiffType", "일반");
 
             trxDAO.updateVanCapDtl(capDtlMap);
-
+            count++;
         }
+        System.out.println("count: " + count);
     }
 
     public long calcDefaultFee(long amount,double rate){
@@ -181,6 +183,27 @@ public class CaptureTest {
         }
 
         return fee;
+    }
+
+    @Test
+    public void ifTest() {
+        SharedMap<String, Object> capDtlMap = new SharedMap<String, Object>();
+        capDtlMap.put("van", "KSPAY");
+        SharedMap<String, Object> trxPayMap = new SharedMap<String, Object>();
+        trxPayMap.put("vanId", "2010000011");
+        if (
+                (capDtlMap.getString("van").startsWith("KSPAY") && (trxPayMap.isEquals("vanId", "2010000001") || trxPayMap.isEquals("vanId", "2010000007") || trxPayMap.isEquals("vanId", "2010000008") || trxPayMap.isEquals("vanId", "2010000010") || trxPayMap.isEquals("vanId", "2010000011")|| trxPayMap.isEquals("vanId", "2010000013"))) ||
+                        (capDtlMap.getString("van").startsWith("GALAXIA") && (trxPayMap.isEquals("vanId", "M2245697") || trxPayMap.isEquals("vanId", "M2253623") || trxPayMap.isEquals("vanId", "M2253625") || trxPayMap.isEquals("vanId", "M2245701") || trxPayMap.isEquals("vanId", "M2370705") || trxPayMap.isEquals("vanId", "M2373147") || trxPayMap.isEquals("vanId", "M2476183")))) {
+            System.out.println("OK");
+        } else {
+            System.out.println("false");
+        }
+    }
+
+    @Test
+    public void testTransferDay() {
+        String transferDay = capture.calcTransferDay("32");
+        logger.info("transferDay: {}" , transferDay);
     }
 
 }
