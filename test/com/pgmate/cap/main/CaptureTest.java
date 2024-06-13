@@ -139,4 +139,48 @@ public class CaptureTest {
 
     }
 
+    @Test
+    public void vanSetting() {
+        List<SharedMap<String, Object>> capList = trxDAO.getCapList();
+
+        logger.info("capListSize : {}", capList.size());
+        for (SharedMap<String, Object> map : capList) {
+            logger.info("capId : {}", map.getString("capId"));
+            SharedMap<String, Object> orgFeeMap = trxDAO.getOrgFee(map.getString("van"));
+
+            SharedMap<String,Object> capDtlMap = new SharedMap<String, Object>();
+
+            double vanInterRate = 0;
+
+            if (map.isEquals("cardType", "체크")) {
+                capDtlMap.put("stlVanRate", orgFeeMap.getDouble("checkRate") + vanInterRate);                    //체크 수수료 적용
+            } else {
+                capDtlMap.put("stlVanRate", orgFeeMap.getDouble("creditRate") + vanInterRate);                    //신용 수수료 적용
+                logger.info("stlVanRate : {}", capDtlMap.getString("stlVanRate"));
+            }
+            capDtlMap.put("stlVanFee", calcDefaultFee(map.getLong("amount"), capDtlMap.getDouble("stlVanRate")));
+            logger.info("stlVanFee : {}", capDtlMap.getString("stlVanFee"));
+
+            capDtlMap.put("benefit"		, map.getLong("stlFee")+map.getLong("stlFeeVat")-map.getLong("stlDistFee")-map.getLong("stlAgencyFee")-map.getLong("stlSalesFee")-capDtlMap.getLong("stlVanFee"));
+            logger.info("benefit : {} ", capDtlMap.getString("benefit"));
+
+            capDtlMap.put("stlDiffType", "일반");
+
+            trxDAO.updateVanCapDtl(capDtlMap);
+
+        }
+    }
+
+    public long calcDefaultFee(long amount,double rate){
+        long decimal = 1000;
+        long fee = 0;
+        if(amount < 0){
+            fee = -new Double(-amount*(rate *decimal)).longValue()/decimal;
+        }else{
+            fee = new Double(amount*(rate *decimal)).longValue()/decimal;
+        }
+
+        return fee;
+    }
+
 }

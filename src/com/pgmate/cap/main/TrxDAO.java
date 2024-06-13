@@ -1399,4 +1399,24 @@ public class TrxDAO extends DAO {
 		return "CS" + getFunction("FN_NEXTVAL2", "TRN");
 	}
 
+	public List<SharedMap<String, Object>> getCapList() {
+		String q = "SELECT * FROM VW_TRX_CAP WHERE vanId='M2249335' AND trxDay IN ('20240605', '20240606') AND stlVanRate=0.0";
+		RecordSet rset = super.query(q);
+		super.initRecord();
+		return rset.getRows();
+
+	}
+
+	public void updateVanCapDtl(SharedMap<String, Object> updateMap) {
+		super.setTable("PG_TRX_CAP_DTL");
+		super.setRecord("stlVanRate"	, updateMap.getDouble("stlVanRate"));
+		super.setRecord("stlVanFee"	, updateMap.getLong("stlVanFee"));
+		super.setRecord("benefit"	, updateMap.getString("benefit"));
+		super.setRecord("stlDiffType"	, updateMap.getString("stlDiffType"));
+
+		super.addWhere("capId", updateMap.getString("capId"));
+
+		logger.info("update PG_TRX_CAP_DTL SET : {},{}", updateMap.getString("capId"), super.update());
+		super.initRecord();
+	}
 }
