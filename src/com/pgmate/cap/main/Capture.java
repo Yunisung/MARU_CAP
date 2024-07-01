@@ -699,7 +699,7 @@ public class Capture {
 			capSubMap.put("stlFeeVat", calcVat(capSubMap.getLong("stlFee")));
 			capSubMap.put("stlAmount", capSubMap.getLong("amount") - capSubMap.getLong("stlFee") - capSubMap.getLong("stlFeeVat"));
 			capSubMap.put("stlType", tmnDtlMap.getString("settleType"));
-			capSubMap.put("stlDay", calcDay(tmnDtlMap.getString("stlType"), trxCapMap.getString("trxDay")));
+			capSubMap.put("stlDay", calcDay(capSubMap.getString("stlType"), trxCapMap.getString("trxDay")));
 			capSubMap.put("stlId", "");
 			capSubMap.put("benefit", capDtlMap.getLong("stlAmount") - capSubMap.getLong("stlAmount"));
 			capSubMap.put("trxDay", trxCapMap.getString("trxDay"));
