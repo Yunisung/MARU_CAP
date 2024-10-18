@@ -265,7 +265,7 @@ public class Capture {
 		trxCapMap.put("issuer", trxPayMap.getString("issuer"));
 		trxCapMap.put("acquirer", trxPayMap.getString("acquirer"));
 		trxCapMap.put("authCd", trxPayMap.getString("authCd"));
-		trxCapMap.put("trxDay", trxPayMap.getString("regDay"));
+		trxCapMap.put("trxDay", trxPayMap.getString("reqDay"));
 		trxCapMap.put("regDay", trxPayMap.getString("regDay"));
 		trxCapMap.put("regTime", trxPayMap.getString("regTime"));
 		trxCapMap.put("regDate", CommonUtil.getCurrentTimestamp());
@@ -1030,7 +1030,7 @@ public class Capture {
 		trxCapMap.put("issuer"		, trxRfdMap.getString("issuer"));
 		trxCapMap.put("acquirer"	, trxRfdMap.getString("acquirer"));
 		trxCapMap.put("authCd"		, trxRfdMap.getString("authCd"));
-		trxCapMap.put("trxDay"		, trxRfdMap.getString("regDay"));
+		trxCapMap.put("trxDay"		, trxRfdMap.getString("reqDay"));
 		trxCapMap.put("serviceType"	, rootCapMap.getString("serviceType"));
 		trxCapMap.put("regDay"		, trxRfdMap.getString("regDay"));
 		trxCapMap.put("regTime"		, trxRfdMap.getString("regTime"));
