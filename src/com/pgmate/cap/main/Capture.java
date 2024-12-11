@@ -581,7 +581,7 @@ public class Capture {
 			//PYS : 부국위너스 영중소 VANID로 변경 2010000007, 2010000008
 			if (!mchtMngMap.getString("diffType").equals("일반") &&
 					(capDtlMap.getString("van").startsWith("KSPAY") && (trxPayMap.isEquals("vanId", "2010000007"))) ||
-					(capDtlMap.getString("van").startsWith("GALAXIA") && (trxPayMap.isEquals("vanId", "M2373543") || trxPayMap.isEquals("vanId", "M2476183"))) ||
+					(capDtlMap.getString("van").startsWith("GALAXIA") && (trxPayMap.isEquals("vanId", "M2373543") || trxPayMap.isEquals("vanId", "M2476183") || trxPayMap.isEquals("vanId", "M2245531"))) ||
 					(capDtlMap.getString("van").startsWith("WELCOME") && (trxPayMap.isEquals("vanId", "wpbukok302") || trxPayMap.isEquals("vanId", "wpbukok501") || trxPayMap.isEquals("vanId", "wpbukok201") || trxPayMap.isEquals("vanId", "wel000937m")|| trxPayMap.isEquals("vanId", "wel000936m")|| trxPayMap.isEquals("vanId", "wel000935m")))) {
 
 				double diffRate = 0;
@@ -1154,7 +1154,7 @@ public class Capture {
 			// 이 외에 vanId는 카드사 차액정산 받지만 따로 정산 안해줌
 			if(!rootCapMap.getString("stlDiffType").equals("일반") &&
 					(capDtlMap.getString("van").startsWith("KSPAY") && (trxRfdMap.isEquals("vanId", "2010000007"))) ||
-					(capDtlMap.getString("van").startsWith("GALAXIA") && (trxRfdMap.isEquals("vanId", "M2373543") || trxRfdMap.isEquals("vanId", "M2476183"))) ||
+					(capDtlMap.getString("van").startsWith("GALAXIA") && (trxRfdMap.isEquals("vanId", "M2373543") || trxRfdMap.isEquals("vanId", "M2476183") || trxRfdMap.isEquals("vanId", "M2245531"))) ||
 					(capDtlMap.getString("van").startsWith("WELCOME") && (trxRfdMap.isEquals("vanId", "wpbukok302") || trxRfdMap.isEquals("vanId", "wpbukok501") || trxRfdMap.isEquals("vanId", "wpbukok201") || trxRfdMap.isEquals("vanId", "wel000937m") || trxRfdMap.isEquals("vanId", "wel000936m") || trxRfdMap.isEquals("vanId", "wel000935m")))) {
 
 				long stlDiffAgencyFee = calcFeeVat(trxCapMap.getLong("amount"), rootCapMap.getDouble("stlDiffAgencyRate"));
