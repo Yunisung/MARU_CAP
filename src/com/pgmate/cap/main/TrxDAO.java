@@ -1419,4 +1419,20 @@ public class TrxDAO extends DAO {
 		logger.info("update PG_TRX_CAP_DTL SET : {},{}", updateMap.getString("capId"), super.update());
 		super.initRecord();
 	}
+
+	public boolean isDiffSettleVanId(String vanId) {
+		super.setTable("PG_VAN");
+		super.setColumns("*");
+		super.addWhere("vanId", vanId, eq);
+		super.addWhere("diffSettle", "사용", eq);
+
+		RecordSet rset = super.search();
+		super.initRecord();
+
+		if(rset.size() > 0){
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
