@@ -249,16 +249,13 @@ public class Capture {
 		}
 
 		// 서비스구분: 외부서비스(월세앱) 사용유무
-		boolean isRentApp = false;
-		if(trxRentMap != null) {
-			isRentApp = "사용".equals(mchtSvcMap.getString("rent")) && !trxRentMap.isNullOrSpace("rentId");
-			logger.info("mcht svc rent : {}", mchtSvcMap.getString("rent"));
-			logger.info("rentId : {}", trxRentMap.isNullOrSpace("rentId"));
-			if (isRentApp) {
-				trxCapMap.put("serviceType", "월세앱");
-			} else {
-				trxCapMap.put("serviceType", "");
-			}
+		boolean isRentApp = "사용".equals(mchtSvcMap.getString("rent")) && !trxRentMap.isNullOrSpace("rentId");
+		logger.info("mcht svc rent : {}", mchtSvcMap.getString("rent"));
+		logger.info("rentId : {}", trxRentMap.isNullOrSpace("rentId"));
+		if (isRentApp) {
+			trxCapMap.put("serviceType", "월세앱");
+		} else {
+			trxCapMap.put("serviceType", "");
 		}
 
 		trxCapMap.put("cardId", trxPayMap.getString("cardId"));
