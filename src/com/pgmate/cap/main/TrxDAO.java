@@ -163,7 +163,7 @@ public class TrxDAO extends DAO {
 	}
 
 	public SharedMap<String, Object> getMchtMngByMchtId(String mchtId) {
-		String key = "PG_MCHT_MNG_" + mchtId;
+		/*String key = "PG_MCHT_MNG_" + mchtId;
 		if (Cache.map.containsKey(key)) {
 			return Cache.map.getUnchecked(key);
 		} else {
@@ -177,6 +177,16 @@ public class TrxDAO extends DAO {
 			}else{
 				return new SharedMap<String,Object>();
 			}
+		}*/
+		super.setTable("PG_MCHT_MNG");
+		super.setColumns("*");
+		super.addWhere("mchtId", mchtId, eq);
+		RecordSet rset = super.search();
+		super.initRecord();
+		if(rset.size() > 0){
+			return rset.getRow(0);
+		}else{
+			return new SharedMap<String,Object>();
 		}
 	}
 
