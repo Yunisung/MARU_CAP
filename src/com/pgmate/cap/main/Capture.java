@@ -655,16 +655,17 @@ public class Capture {
 
 				long stlDiffAgencyFee = calcFeeVat(trxCapMap.getLong("amount"), stlDiffAgencyRate);
 				long stlDiffDistFee = calcFeeVat(trxCapMap.getLong("amount"), stlDiffDistRate);
+				long stlDiffSalesFee = calcFeeVat(trxCapMap.getLong("amount"), stlDiffSalesRate);
 
 				capDtlMap.put("stlDiffAgencyRate", stlDiffAgencyRate);
 				capDtlMap.put("stlDiffAgencyFee", stlDiffAgencyFee);
 				capDtlMap.put("stlDiffDistRate", stlDiffDistRate);
 				capDtlMap.put("stlDiffDistFee", stlDiffDistFee);
 				capDtlMap.put("stlDiffSalesRate", stlDiffSalesRate);
-				capDtlMap.put("stlDiffSalesFee", calcFee(capDtlMap.getLong("stlDiffAgencyFee"), capDtlMap.getDouble("stlDiffSalesRate")));
+				capDtlMap.put("stlDiffSalesFee", stlDiffSalesFee);
 
 				// 에이전시 차액정산 최종 수수료 : 에이전시 차액정산 수수료 - 지사 차액정산 수수료
-				capDtlMap.put("stlDiffAgencyFee", capDtlMap.getLong("stlDiffAgencyFee") - capDtlMap.getLong("stlDiffSalesFee"));
+//				capDtlMap.put("stlDiffAgencyFee", capDtlMap.getLong("stlDiffAgencyFee") - capDtlMap.getLong("stlDiffSalesFee"));
 
 				// 영중소 가맹점일 경우 대행사, 에이전시, 지사 일반 수수료는 0으로 한다.
 				capDtlMap.put("stlDistFee", 0);
@@ -679,7 +680,7 @@ public class Capture {
 				capDtlMap.put("stlDiffAmt", calcFeeVat(trxCapMap.getLong("amount"), diffRate));
 				capDtlMap.put("stlDiffStatus", "결과대기");
 				long benefit1 = capDtlMap.getLong("stlFee") + capDtlMap.getLong("stlFeeVat") - capDtlMap.getLong("stlDistFee") - capDtlMap.getLong("stlAgencyFee") - capDtlMap.getLong("stlSalesFee") - capDtlMap.getLong("stlVanFee");
-				long benefit2 = capDtlMap.getLong("stlDiffAmt") - (stlDiffDistFee + stlDiffAgencyFee);
+				long benefit2 = capDtlMap.getLong("stlDiffAmt") - (stlDiffDistFee + stlDiffAgencyFee + stlDiffSalesFee);
 				capDtlMap.put("benefit", benefit1 + benefit2);
 			} else {
 				capDtlMap.put("benefit", capDtlMap.getLong("stlFee") + capDtlMap.getLong("stlFeeVat") - capDtlMap.getLong("stlDistFee") - capDtlMap.getLong("stlAgencyFee") - capDtlMap.getLong("stlSalesFee") - capDtlMap.getLong("stlVanFee"));
@@ -1176,16 +1177,17 @@ public class Capture {
 
 				long stlDiffAgencyFee = calcFeeVat(trxCapMap.getLong("amount"), rootCapMap.getDouble("stlDiffAgencyRate"));
 				long stlDiffDistFee = calcFeeVat(trxCapMap.getLong("amount"), rootCapMap.getDouble("stlDiffDistRate"));
+				long stlDiffSalesFee = calcFeeVat(trxCapMap.getLong("amount"), rootCapMap.getDouble("stlDiffSalesRate"));
 				
 				capDtlMap.put("stlDiffAgencyRate",rootCapMap.getDouble("stlDiffAgencyRate"));
 				capDtlMap.put("stlDiffAgencyFee",stlDiffAgencyFee);
 				capDtlMap.put("stlDiffDistRate",rootCapMap.getDouble("stlDiffDistRate"));
 				capDtlMap.put("stlDiffDistFee",stlDiffDistFee);
 				capDtlMap.put("stlDiffSalesRate", rootCapMap.getDouble("stlDiffSalesRate"));
-				capDtlMap.put("stlDiffSalesFee"	, calcFee(capDtlMap.getLong("stlDiffAgencyFee"), capDtlMap.getDouble("stlDiffSalesRate")));
+				capDtlMap.put("stlDiffSalesFee"	, stlDiffSalesFee);
 				
 				// 에이전시 차액정산 수수료 : 에이전시 차액정산 수수료 - 지사 차액정산 수수료
-				capDtlMap.put("stlDiffAgencyFee", capDtlMap.getLong("stlDiffAgencyFee")-capDtlMap.getLong("stlDiffSalesFee"));
+//				capDtlMap.put("stlDiffAgencyFee", capDtlMap.getLong("stlDiffAgencyFee")-capDtlMap.getLong("stlDiffSalesFee"));
 				
 				// 영중소 가맹점일 경우 대행사, 에이전시, 지사 일반 수수료는 0으로 한다.
 				capDtlMap.put("stlDistFee", 0);
@@ -1199,7 +1201,7 @@ public class Capture {
 				capDtlMap.put("stlDiffAmt"	, calcFeeVat(trxCapMap.getLong("amount"),rootCapMap.getDouble("stlDiffRate")));
 				capDtlMap.put("stlDiffStatus", "결과대기");
 				long benefit1 = capDtlMap.getLong("stlFee")+capDtlMap.getLong("stlFeeVat")-capDtlMap.getLong("stlDistFee")-capDtlMap.getLong("stlAgencyFee")-capDtlMap.getLong("stlSalesFee")-capDtlMap.getLong("stlVanFee");
-				long benefit2 = capDtlMap.getLong("stlDiffAmt") - (stlDiffDistFee + stlDiffAgencyFee);
+				long benefit2 = capDtlMap.getLong("stlDiffAmt") - (stlDiffDistFee + stlDiffAgencyFee + stlDiffSalesFee);
 				capDtlMap.put("benefit"		,  benefit1 + benefit2);
 				
 			} else {
