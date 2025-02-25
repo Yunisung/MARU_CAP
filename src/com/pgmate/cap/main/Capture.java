@@ -655,6 +655,7 @@ public class Capture {
 
 				long stlDiffAgencyFee = calcFeeVat(trxCapMap.getLong("amount"), stlDiffAgencyRate);
 				long stlDiffDistFee = calcFeeVat(trxCapMap.getLong("amount"), stlDiffDistRate);
+				// 지사 수수료금액 계산 추가
 				long stlDiffSalesFee = calcFeeVat(trxCapMap.getLong("amount"), stlDiffSalesRate);
 
 				capDtlMap.put("stlDiffAgencyRate", stlDiffAgencyRate);
@@ -663,6 +664,8 @@ public class Capture {
 				capDtlMap.put("stlDiffDistFee", stlDiffDistFee);
 				capDtlMap.put("stlDiffSalesRate", stlDiffSalesRate);
 				capDtlMap.put("stlDiffSalesFee", stlDiffSalesFee);
+//				capDtlMap.put("stlDiffSalesFee", calcFee(capDtlMap.getLong("stlDiffAgencyFee"), capDtlMap.getDouble("stlDiffSalesRate")));
+
 
 				// 에이전시 차액정산 최종 수수료 : 에이전시 차액정산 수수료 - 지사 차액정산 수수료
 //				capDtlMap.put("stlDiffAgencyFee", capDtlMap.getLong("stlDiffAgencyFee") - capDtlMap.getLong("stlDiffSalesFee"));
@@ -680,6 +683,7 @@ public class Capture {
 				capDtlMap.put("stlDiffAmt", calcFeeVat(trxCapMap.getLong("amount"), diffRate));
 				capDtlMap.put("stlDiffStatus", "결과대기");
 				long benefit1 = capDtlMap.getLong("stlFee") + capDtlMap.getLong("stlFeeVat") - capDtlMap.getLong("stlDistFee") - capDtlMap.getLong("stlAgencyFee") - capDtlMap.getLong("stlSalesFee") - capDtlMap.getLong("stlVanFee");
+//				long benefit2 = capDtlMap.getLong("stlDiffAmt") - (stlDiffDistFee + stlDiffAgencyFee);
 				long benefit2 = capDtlMap.getLong("stlDiffAmt") - (stlDiffDistFee + stlDiffAgencyFee + stlDiffSalesFee);
 				capDtlMap.put("benefit", benefit1 + benefit2);
 			} else {
@@ -1185,7 +1189,9 @@ public class Capture {
 				capDtlMap.put("stlDiffDistFee",stlDiffDistFee);
 				capDtlMap.put("stlDiffSalesRate", rootCapMap.getDouble("stlDiffSalesRate"));
 				capDtlMap.put("stlDiffSalesFee"	, stlDiffSalesFee);
-				
+//				capDtlMap.put("stlDiffSalesFee"	, calcFee(capDtlMap.getLong("stlDiffAgencyFee"), capDtlMap.getDouble("stlDiffSalesRate")));
+
+
 				// 에이전시 차액정산 수수료 : 에이전시 차액정산 수수료 - 지사 차액정산 수수료
 //				capDtlMap.put("stlDiffAgencyFee", capDtlMap.getLong("stlDiffAgencyFee")-capDtlMap.getLong("stlDiffSalesFee"));
 				
@@ -1196,14 +1202,15 @@ public class Capture {
 				capDtlMap.put("stlAgencyRate", 0);
 				capDtlMap.put("stlSalesFee", 0);
 				capDtlMap.put("stlSalesRate", 0);
-				
+
 				capDtlMap.put("stlDiffRate"	, rootCapMap.getDouble("stlDiffRate"));
 				capDtlMap.put("stlDiffAmt"	, calcFeeVat(trxCapMap.getLong("amount"),rootCapMap.getDouble("stlDiffRate")));
 				capDtlMap.put("stlDiffStatus", "결과대기");
 				long benefit1 = capDtlMap.getLong("stlFee")+capDtlMap.getLong("stlFeeVat")-capDtlMap.getLong("stlDistFee")-capDtlMap.getLong("stlAgencyFee")-capDtlMap.getLong("stlSalesFee")-capDtlMap.getLong("stlVanFee");
+//				long benefit2 = capDtlMap.getLong("stlDiffAmt") - (stlDiffDistFee + stlDiffAgencyFee);
 				long benefit2 = capDtlMap.getLong("stlDiffAmt") - (stlDiffDistFee + stlDiffAgencyFee + stlDiffSalesFee);
 				capDtlMap.put("benefit"		,  benefit1 + benefit2);
-				
+
 			} else {
 				capDtlMap.put("benefit"		, capDtlMap.getLong("stlFee")+capDtlMap.getLong("stlFeeVat")-capDtlMap.getLong("stlDistFee")-capDtlMap.getLong("stlAgencyFee")-capDtlMap.getLong("stlSalesFee")-capDtlMap.getLong("stlVanFee"));
 		}
